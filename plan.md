@@ -91,6 +91,8 @@ const enFiles = import.meta.glob("/<content>/*/README_en.md", {
 日后内容仓库迁移到 `ruyisdk/*` 时，只需改 submodule URL 和 glob 路径常量。  
 网络不通时用本地 `mock/` 目录跑通全部 UI。
 
+**当前 `test-doc` 实际约定**：顶层为板卡目录（如 `Duo_S`、`LicheePi4A`），正文为 `README.md` + `README_zh.md`（无 `README_en.md` 时英文用 `README.md`）。数据层已兼容 `README_zh` / `README_en` 命名。
+
 ---
 
 ## Phase 1: 脚手架
