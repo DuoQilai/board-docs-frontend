@@ -1,374 +1,170 @@
-# RuyiSDK Examples — 技术实现方案
+# RuyiSDK Examples — 实施计划
 
-> 写给 AI Agent 看的技术实现计划，基于 2026-03-22 与躲起来的讨论
-> 工作目录：`/home/fengde/support-matrix-frontend`
-
----
-
-## 1. 现有代码库分析
-
-### 1.1 技术栈
-
-- **框架**：Astro 5.12.3（SSR/静态混合）
-- **UI 组件**：React 19（交互部分）+ Astro（静态部分）
-- **样式**：Tailwind CSS 4 + shadcn/ui 组件库
-- **i18n**：Astro 内置 i18n，URL 路由 `/` 和 `/zh-CN/`
-- **内容读取**：`import.meta.glob` 在 build 时读取 submodule 中的 Markdown
-- **Markdown 处理**：remark-gfm + rehype-autolink-headings + rehype-github-alert + shiki 代码高亮
-- **包管理**：pnpm 10.12.4
-
-### 1.2 现有 Submodule
-
-```
-support-matrix/    → ruyisdk/support-matrix（Board × OS 内容）
-packages-index/     → ruyisdk/packages-index（SDK 包索引）
-```
-
-Submodule 在 `.gitmodules` 中注册，通过 `git submodule update --init --recursive` 拉取。
-
-### 1.3 现有数据读取模式（参考 `src/lib/data.ts`）
-
-```typescript
-// glob 读取 submodule 里的 Markdown
-const readmeFiles = import.meta.glob("/support-matrix/*/README.md", {
-  query: "?raw",
-  import: "default",
-});
-
-// 从路径提取目录名
-const boards = Object.keys(readmeFiles)
-  .map(path => path.match(/\/support-matrix\/([^\/]+)\/README\.md$/)?.[1])
-  .filter(name => name !== ".github" && name !== "assets");
-
-// frontmatter 解析：正则提取 --- 块，YAML.parse
-```
-
-### 1.4 现有路由结构
-
-```
-src/pages/
-  index.astro              → /
-  table.astro              → /table
-  reports/
-    index.astro            → /reports
-    [board]-[system]-[file].astro  → /reports/xxx
-  boards/
-    [board].astro          → /boards/[board]
-  zh-CN/                   → /zh-CN/*（双语）
-```
-
-### 1.5 现有导航配置
-
-导航定义在 `src/layouts/Layout.astro` 的 Header 组件 props 中：
-
-```astro
-<Header
-  navigation={[
-    { label: "nav.table", href: "/table/" },
-    { label: "nav.list", href: "/reports/" },
-  ]}
-/>
-```
-
-SidebarToggle 共用同一 `navigation` prop。
-
-**实际页面结构**：
-- `/`（首页）— Board/System 切换按钮（Overview.tsx 内）
-- `/table` — OS Support Sheet（矩阵表）
-- `/reports` — Test Reports List（测试报告列表）
-- `/boards/[board]` — 板子详情页（目前有 OS 列表，无 Examples）
+> 基于 `design.md` 的技术实施计划；工作仓库：**本仓库** `ruyisdk-examples-frontend`  
+> **不修改** `support-matrix-frontend`（matrix 零改动）；该仓库仅以 **submodule 只读参考** 引入。
 
 ---
 
-## 2. 示例内容结构（待创建）
+## 0. 与 `design.md` 的对应关系
 
-### 2.1 内容仓库结构
+| 设计要点 | 实施含义 |
+| --- | --- |
+| 独立站点、独立部署 | 在本仓库内从零搭建 Astro 站点，路由与构建只属于本仓库 |
+| 技术栈复用 matrix | Astro + React + TypeScript + Tailwind CSS v4 + shadcn/ui + pnpm；参照 `./support-matrix-frontend/src/` 的写法，**不 import 其运行时代码** |
+| 示例内容独立仓库 | Markdown/图在 **内容仓库**（当前可参考 `DuoQilai/test-doc`，日后可迁 `ruyisdk/*`）；本仓库用 submodule 或构建时拉取 |
+| 两种找法 | 首页：**示例卡片** + **按板子筛选**（左树 / 顶栏芯片，见下） |
+| Fedora 式布局 | 顶栏搜索 + 左侧 Vendor → SoC → Board 树形筛选 + 右侧示例卡片网格 |
+| 详情页 | 顶部元信息 + Markdown 正文 + 底部「支持的板子」 |
+| 双语 | `README.md` / `README_en.md`；站点路由可做 `/` 与 `/zh-CN/`（与 matrix 习惯一致即可） |
 
+---
+
+## 1. 仓库结构（目标）
+
+```text
+ruyisdk-examples-frontend/
+  design.md
+  plan.md
+  support-matrix-frontend/     # git submodule，只读参考，不提交对其的修改
+  <content-submodule>/         # 例：test-doc 或 sdk-examples，见 §6
+  src/
+    components/                # ExampleSidebar、ExampleCard、Layout…
+    lib/                       # examples.ts 等
+    pages/                     # index、[slug]、zh-CN/…
+  astro.config.mjs
+  package.json
+  ...
 ```
-sdk-examples/                    # 未来新建仓库，作为 submodule
-  hello-world/
-    README.md                   # 中文
-    README_en.md                # 英文
-  coremark/
-    README.md
-    README_en.md
-  gpio-demo/
-    README.md
-    README_en.md
-  dhrystone/
-    README.md
-    README_en.md
-```
 
-### 2.2 Frontmatter 字段
+---
+
+## 2. 示例内容与 Frontmatter
+
+与 `design.md` §4、§5 一致：每个示例为目录，内含 `README.md`、`README_en.md`。
+
+**Frontmatter**（可与设计一致用中文键；解析时在代码里映射为内部类型）：
 
 ```yaml
 ---
-title: Hello World
-category: Getting Started
-boards:
+标题: Hello World
+分类: 入门
+支持的板子:
   - Milk-V Duo
   - VisionFive 2
   - LicheePi4A
-date: 2026-03-20
+更新日期: 2026-03-20
 ---
 ```
 
-### 2.3 预定义分类
-
-`Getting Started` | `Benchmark` | `Hardware` | `Network` | `Graphics` | `Multimedia`
+**分类枚举**（设计 §5）：入门、跑分、硬件、网络、图形、音视频（实现层可用英文 slug：`getting-started`、`benchmark`、`hardware`、`network`、`graphics`、`multimedia` 做路由与筛选）。
 
 ---
 
-## 3. 新增文件清单
-
-### 3.1 数据层
+## 3. 数据层
 
 **`src/lib/examples.ts`**（新建）
-- `ExampleMetaData` 接口
-- `getAllExamples()` — 返回所有示例目录名
-- `getExampleData(slug)` — 返回 frontmatter 元数据
-- `getExampleContent(slug, lang)` — 返回 Markdown 正文（根据语言返回 README.md 或 README_en.md）
-- 参考 `src/lib/data.ts` 的 extractFrontmatter 模式
 
-### 3.2 页面
+- 定义 `ExampleMeta`（标题、分类、支持的板子、更新日期、slug 等）
+- `getAllExamples()`：扫描内容 submodule 下各子目录
+- `getExampleBySlug(slug)`：元数据 + 正文路径
+- `getExampleMarkdown(slug, lang)`：`zh` → `README.md`，`en` → `README_en.md`
+- Frontmatter 解析：沿用 matrix 常见做法（`---` 块 + YAML），键名兼容中文
 
-| 文件 | 路由 |
-|---|---|
-| `src/pages/examples/index.astro` | `/examples` |
-| `src/pages/examples/[example].astro` | `/examples/[example]` |
-| `src/pages/zh-CN/examples/index.astro` | `/zh-CN/examples` |
-| `src/pages/zh-CN/examples/[example].astro` | `/zh-CN/examples/[example]` |
-
-### 3.3 组件
-
-| 文件 | 说明 |
-|---|---|
-| `src/components/examples/ExampleSidebar.tsx` | **左侧树形筛选导航**（参照 Fedora BoardList.js：板子名树形折叠，Accordion 交互） |
-| `src/components/examples/ExampleCard.tsx` | 示例卡片（React 交互） |
-
-### 3.4 配置改动
-
-| 文件 | 改动 |
-|---|---|
-| `src/layouts/Layout.astro` | navigation prop 新增 `{ label: "nav.examples", href: "/examples/" }` |
-| `src/i18n/ui.ts` | 新增 `nav.examples`、`examples.*` 等翻译字段 |
-| `.gitmodules` | 新增 `[submodule "test-doc"]` |
-| `astro.config.mjs` | 预计不需要改动 |
-
-**入口说明**：Examples 仅通过导航栏新增入口，不改动 `/boards/[board]` 等现有页面。
+可选：**`src/lib/boards.ts`** — 从元数据聚合「所有出现过的板子」，供左侧树排序；若需 **Vendor → SoC → Board** 层级，需约定映射表（JSON 或 frontmatter 扩展字段），**待定**（见 `design.md` §9）。
 
 ---
 
-## 4. 页面详细设计
+## 4. 页面与路由（独立站点）
 
-### 4.1 `/examples` 首页
+站点首页即「示例总览」（对应设计里的首屏），建议路由示例：
 
-**参考**：Fedora 的 BoardList.js 布局（左导航 + 右内容区）
+| 路由 | 说明 |
+| --- | --- |
+| `/` | 顶栏搜索 + 左树筛选 + 右卡片网格 |
+| `/[example]/` 或 `/examples/[example]/` | 示例详情（选一种 URL 方案，保持全站一致） |
+| `/zh-CN/` … | 中文界面与中文示例正文默认语言 |
 
-**组件**：`ExampleSidebar.tsx`（React，Accordion 树形筛选）+ `ExampleCard.tsx`（React 卡片）
-
-**布局**：左侧固定宽度筛选栏 + 右侧弹性卡片网格
-
-**逻辑**：
-1. `getAllExamples()` 读取所有示例
-2. `getAllBoards()` 读取所有板子
-3. 左侧显示板子树（按名称字母排序折叠）
-4. 右侧按当前筛选条件展示示例卡片
-5. 搜索框过滤（板子名 + 示例名双重搜索）
-
-**参考 Fedora BoardList.js 交互模式**：
-```typescript
-// 搜索过滤逻辑
-const filtered = examples.filter(ex =>
-  ex.name.includes(search) ||
-  ex.boards.some(b => b.includes(search))
-);
-
-// Accordion 折叠（按板子分组）
-{boardsByVendor.map(vendor => (
-  <Accordion allowToggle>
-    <AccordionButton>{vendor.name}</AccordionButton>
-    <AccordionPanel>
-      {vendor.boards.map(board => (
-        <Button onClick={() => filterByBoard(board)}>{board}</Button>
-      ))}
-    </AccordionPanel>
-  </Accordion>
-))}
-```
-
-### 4.2 `/examples/[example]` 详情页
-
-**动态路由**：`getStaticPaths()` 调用 `getAllExamples()`
-
-**逻辑**：
-1. `getExampleData(slug)` 读取 frontmatter
-2. `getExampleContent(slug, lang)` 读取 Markdown 正文
-3. 渲染 Markdown（用现有 remark-gfm 配置）
-4. 展示支持的板子列表（从 boards frontmatter 字段读取）
+**不在** matrix 的 `Layout.astro` 里加导航；若 matrix 侧加「示例教程」外链，属 **可选运营项**（`design.md` §6、§9）。
 
 ---
 
-## 5. 实现顺序
+## 5. 组件
 
-### Phase 1: 数据层 + Mock 数据
-1. 新增 `src/lib/examples.ts`
-2. 本地创建 mock 数据 `src/data/mock-examples.ts`（3 个示例：HelloWorld, CoreMark, GPIO）
-3. 验证数据读取正确（Playwright headless 验证）
+| 组件 | 职责 |
+| --- | --- |
+| `ExampleSidebar`（React） | 左侧树形筛选：Vendor → SoC → Board；交互可参考 Fedora BoardList / Accordion |
+| `ExampleCard`（React） | 示例卡片：标题、分类、缩略信息 |
+| 布局外壳 | 顶栏含站点标题「RuyiSDK Examples」+ **搜索框** |
 
-### Phase 2: 导航
-4. `src/layouts/Layout.astro` — Header 导航新增 Examples 项
-5. `src/i18n/ui.ts` — 新增翻译字段
-
-### Phase 3: 页面
-6. `src/pages/examples/index.astro` — 示例首页（含 ExampleSidebar + ExampleCard，参考 Fedora 布局）
-7. `src/pages/examples/[example].astro` — 示例详情页
-8. `src/pages/zh-CN/examples/` — 双语路由
-
-### Phase 4: 收尾
-9. 全局样式检查，与现有风格一致
-10. Playwright e2e 测试文件编写 + headless 跑通
-11. 构建验证：`pnpm build`
+详情页：展示 frontmatter 元信息、Markdown 渲染（remark-gfm、shiki 等与 matrix 对齐）、底部板卡列表。
 
 ---
 
 ## 6. 内容仓库集成
 
-### 6.1 Submodule（当前）
+| 阶段 | 做法 |
+| --- | --- |
+| 当前 | 可将 `DuoQilai/test-doc` 或正式示例仓库加为 submodule，目录名如 `test-doc` 或 `sdk-examples` |
+| glob | `import.meta.glob("/<submodule>/*/README.md", { query: "?raw", import: "default" })`，英文同理 `README_en.md` |
+| 日后迁移 | 仅改 submodule URL 与路径常量，见 `design.md` 仓库划分表 |
 
-`DuoQilai/test-doc` 就是示例文档仓库，添加为 submodule：
-
-```bash
-git submodule add https://github.com/DuoQilai/test-doc.git test-doc
-```
-
-### 6.2 读取路径
-
-```
-/test-doc/Duo_S/README.md       → 中文
-/test-doc/Duo_S/README_en.md  → 英文
-/test-doc/LicheePi4A/README.md
-...
-```
-
-glob pattern：
-```typescript
-const exampleFiles = import.meta.glob("/test-doc/*/README.md", {
-  query: "?raw",
-  import: "default",
-});
-const exampleFilesEn = import.meta.glob("/test-doc/*/README_en.md", {
-  query: "?raw",
-  import: "default",
-});
-```
-
-### 6.3 未来迁移
-
-`ruyisdk/` 下正式仓库建立后，修改 `.gitmodules` 指向新地址：
-
-```bash
-git submodule deinit -f test-doc
-git rm test-doc
-git submodule add https://github.com/ruyisdk/sdk-examples.git test-doc
-```
+若 submodule 拉取困难，**Phase 1** 可先用 `src/data/mock-examples` 或本地 fixtures 跑通 UI。
 
 ---
 
-## 7. 阻塞项（BLOCKING）
+## 7. 实现顺序
 
-| # | 阻塞项 | 状态 | 解决方案 |
-|---|---|---|---|
-| 1 | submodule 网络慢/超时 | ⚠️ 后台重试中 | 不阻塞 mock 数据方案 |
-| 2 | 第一个示例的标题/内容未定 | ❌ 待确认 | 参考 test-doc 现有内容创建 |
+### Phase 1：工程脚手架 + submodule
 
-**当前方案**：Phase 1 先用本地 mock 数据开发，等 submodule 拉好后接入 `DuoQilai/test-doc` 真实内容。
+1. 在本仓库初始化 Astro 工程（pnpm、Tailwind v4、React、TypeScript、shadcn/ui）
+2. `git submodule add`：`support-matrix-frontend`（只读参考）
+3. 添加内容 submodule（或 mock 目录）并确认 `import.meta.glob` 可读
 
----
+### Phase 2：数据层
 
-## 8. 开发与验收流程
+4. 实现 `src/lib/examples.ts`（含 frontmatter 解析与中英键映射）
+5. 单元级或脚本校验：能列出示例、读出正文
 
-### 8.1 环境信息
+### Phase 3：首页（Fedora 式）
 
-| 角色 | IP | 说明 |
-|---|---|---|
-| 开发/测试 | 100.90.186.53 | Agent 工作在 Linux，dev server 跑在这里 |
-| 验收 | 100.114.70.79 | 用户在 Mac 上用浏览器验收 |
-| SSH 用户 | fengde | Linux 登录用户 |
-| Dev Server 端口 | 3000 | 自定义约定端口 |
+6. 顶栏搜索 + `ExampleSidebar` + `ExampleCard` 网格
+7. 搜索过滤：示例名 + 板子名（`design.md` §10）
 
-### 8.2 Agent 开发流程（Linux 端）
+### Phase 4：详情与双语
 
-```bash
-# 1. 启动 dev server
-cd /home/fengde/support-matrix-frontend
-pnpm dev --host 0.0.0.0 --port 3000
+8. 详情页路由 + Markdown 渲染 +「支持的板子」列表
+9. `/zh-CN/` 路由与语言切换（与 `design.md` §8 一致）
 
-# 2. 用 Playwright headless 测试（无头浏览器自动化验证）
-npx playwright test
-# 或单个文件
-npx playwright test src/test/examples.spec.ts
+### Phase 5：质量与部署
 
-# 3. 截图对比（如需要）
-npx playwright screenshot http://localhost:3000/examples/ /tmp/examples-home.png
-npx playwright screenshot http://localhost:3000/examples/hello-world/ /tmp/example-detail.png
-
-# 4. 构建验证
-pnpm build
-```
-
-### 8.3 用户验收流程（Mac 端）
-
-```bash
-# 用户在 Mac 终端执行，建立 SSH 隧道
-ssh -L 3000:localhost:3000 fengde@100.90.186.53
-
-# 然后 Mac 浏览器打开
-http://localhost:3000
-```
-
-### 8.4 Agent 测试要求（无头浏览器验证）
-
-**每个阶段完成后，必须用 Playwright headless 跑自动化验证，不依赖人工点击检查：**
-
-| 阶段 | 验证内容 | Playwright 测试点 |
-|---|---|---|
-| Phase 1 | 数据层 | 数据读取正确，mock 数据能正常解析 |
-| Phase 2 | 导航 | Header 显示 Examples 链接，Sidebar 能打开 |
-| Phase 3 | 示例首页 | 页面加载、左侧筛选栏渲染、示例卡片网格显示 |
-| Phase 3 | 示例详情页 | Markdown 渲染、支持板子列表、路由跳转 |
-| Phase 3 | 双语 | /zh-CN/examples 加载正常 |
-| 全局 | 构建 | `pnpm build` 退出码 0，无 console.error |
-
-**自动化测试命令**（每次 commit 前必跑）：
-```bash
-pnpm build && npx playwright test
-```
-
-### 8.5 Playwright 测试文件位置
-
-```
-support-matrix-frontend/
-  e2e/
-    examples.spec.ts      # 示例板块端到端测试
-    navigation.spec.ts    # 导航测试
-    build.spec.ts         # 构建测试
-  screenshots/
-    examples-home.png      # 首页截图（留存对比）
-    example-detail.png     # 详情页截图
-```
+10. `pnpm build` 无报错；按需 Playwright e2e（首页、详情、语言）
+11. CI（可选）：lint + build + e2e
 
 ---
 
-## 9. 验收标准
+## 8. 待定与阻塞（同步 `design.md` §9）
 
-- [ ] Agent 用 Playwright headless 跑通所有 e2e 测试，无报错
-- [ ] `pnpm build` 通过，退出码 0
-- [ ] 用户在 Mac 浏览器 `http://localhost:3000` 能看到 `/examples` 页面
-- [ ] Header 导航显示 Examples 入口
-- [ ] `/examples` 页面正常加载，Fedora 风格左侧筛选 + 右侧卡片网格
-- [ ] 点击示例进入详情页，Markdown 渲染正确
-- [ ] "支持的板子"列表正确
-- [ ] 中英文切换正常
-- [ ] 与现有风格视觉一致
+| 项 | 说明 |
+| --- | --- |
+| 独立站点域名 / 子域 | 部署时配置 |
+| `ruyisdk/` 下正式内容仓库名 | 迁移时更新 submodule |
+| matrix 是否加外链 | 非本仓库代码阻塞 |
+| 第一个示例内容定稿 | 内容侧 |
+| 示例是否关联上游代码仓库链接 | 产品决策 |
+| 左侧树 Vendor/SoC/Board 数据来源 | 需板卡层级数据源或手工配置 |
+
+---
+
+## 9. 验收标准（独立站点）
+
+- [ ] 本仓库 `pnpm build` 成功
+- [ ] 首页呈现：搜索 + 左筛选 + 示例卡片网格（符合 `design.md` §3、§10）
+- [ ] 可从卡片进入详情，Markdown 与「支持的板子」正确
+- [ ] 中英文 README 可读、路由或语言切换可用
+- [ ] **未** 对 `support-matrix-frontend` 子模块产生业务性修改（仅参考其工程习惯）
+
+---
+
+## 10. 与旧方案（matrix 内嵌 `/examples`）的差异说明
+
+此前若计划在 **support-matrix-frontend** 内增加 `/examples`：**与当前 `design.md` 不一致**。已废弃该路径；一切开发在 **ruyisdk-examples-frontend** 完成，matrix 保持零改动。
