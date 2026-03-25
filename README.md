@@ -10,18 +10,46 @@ Astro 6 + React + TypeScript + Tailwind CSS v4 + shadcn/ui — 与 support-matri
 
 ## 快速开始
 
+### 前置要求
+
+- **Node.js**：`>= 22.12.0`（见 `package.json#engines`）
+- **pnpm**：建议用 Corepack 管理（`corepack enable`）
+- **git**：需要拉取子模块（`--recurse-submodules`）
+
+### 安装与启动（开发）
+
 ```bash
 # 克隆（含 submodule）
 git clone --recurse-submodules https://github.com/your-org/ruyisdk-examples-frontend.git
 cd ruyisdk-examples-frontend
+
+# 如已克隆但忘了带 submodule（或 submodule 为空）
+git submodule update --init --recursive
+
 pnpm install
 
-# 开发（localhost:3000）
+# 开发（默认 http://localhost:3000）
+# 注意：该命令会尝试释放 3000 端口（会 kill 掉占用 3000 的进程），然后启动 Astro
 pnpm dev
+
+# 不想自动 kill 端口的话（直接启动 Astro dev）
+pnpm dev:only
+
+# 自定义端口（仍会 strictPort；若端口被占用会直接失败）
+PORT=3001 pnpm dev
 
 # 构建
 pnpm build
+
+# 本地预览生产构建
+pnpm preview
 ```
+
+### 常见问题
+
+- **`pnpm dev` 提示找不到 `fuser`**：在部分 Linux 发行版上需要安装 `psmisc`（提供 `fuser`）；或者改用 `pnpm dev:only` 跳过自动释放端口逻辑。
+- **3000 端口被占用**：项目配置了 `strictPort: true`，端口占用时不会自动换到 3001/3002；可用 `PORT=xxxx pnpm dev` 或先手动停止占用 3000 的进程。
+- **页面没内容/板子列表为空**：确认 `test-doc/` 子模块已初始化并拉取（执行 `git submodule update --init --recursive`）。
 
 ## 目录结构
 
