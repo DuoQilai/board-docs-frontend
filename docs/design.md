@@ -27,7 +27,7 @@ RISC-V 开发板用户，**手里已有一块板子**，想在板子上跑程序
 ### 术语（和表格列的对应关系）
 
 - **SoC**（System on Chip，片上系统）：**一颗芯片**里集成了 CPU、总线、外设控制器等，是「芯片型号」这一层。表里 **Soc** 列（如 `TH1520`、`SG2000`）指的就是这一层；站点里用 frontmatter 的 **`cpu`**（或后续与内容仓库对齐的 SoC 字段）与之对应。
-- **Silicon Vendor / 芯片厂商**（`soc_vendor`）：设计或销售这颗 SoC 的厂商（如 `XuanTie`、`Sophgo`）。**不等于**板卡品牌。
+- **Silicon Vendor / 芯片厂商**（`silicon_vendor`，兼容旧字段 `soc_vendor`）：设计或销售这颗 SoC 的厂商（如 `XuanTie`、`Sophgo`）。**不等于**板卡品牌。
 - **Board / 开发板**：一块可买的板子（如 `Lichee Pi 4A`），用 **`product`** + 目录名区分。
 - **Board Vendor / 板厂**（`vendor`）：做这块板子的品牌（如 `Sipeed`、`Milk-V`）。与 `soc_vendor` **不是同一概念**：同一块 SoC 可以有多家板厂出不同的板。
 
@@ -35,18 +35,18 @@ RISC-V 开发板用户，**手里已有一块板子**，想在板子上跑程序
 
 ### 信息架构与 URL（已确认）
 
-层级：**芯片厂商（soc_vendor）→ SoC（芯片型号）→ 开发板 → 示例文档**。
+层级：**芯片厂商（silicon_vendor）→ SoC（芯片型号）→ 开发板 → 示例文档**。
 
 | 页面 | URL 形态 | 说明 |
 | --- | --- | --- |
-| 芯片厂商 | `/vendors/{vendorSlug}/` | 列出该厂商下有哪些 SoC（及链到各 SoC 页） |
-| SoC | `/socs/{socSlug}/` | 列出该 SoC 下有哪些开发板 |
+| 芯片厂商 | `/vendors/{vendorSlug}/` | 列出该厂商下有哪些 SoC 与开发板 |
+| SoC | `/socs/{socSlug}/` | **重定向到对应芯片厂商页**（保留旧链接，不作为独立信息页） |
 | 开发板 | `/boards/{boardSlug}/` | 板子介绍 + 属性 + 示例列表 |
 | 示例 | `/boards/{boardSlug}/{exampleSlug}/` | Markdown 教程正文 |
 
-首页：桌面端左侧侧栏**永久展示**，且支持**收起**（仅桌面；移动端不要求常驻侧栏）。侧栏导航树**第一层按 `soc_vendor` 分组**（不按板厂 `vendor`）。主区仍为搜索 + 板子卡片网格。线框见 §11。
+站点布局：桌面端左侧侧栏**永久展示**，且支持**收起**（仅桌面；移动端不要求常驻侧栏）。侧栏导航树**第一层按 `silicon_vendor` 分组**（不按板厂 `vendor`）。侧栏搜索框常驻；页面右侧主内容在各页面间切换时侧栏保持不变。
 
-**开发板详情页**同时展示 **`soc_vendor`（芯片厂商）与 `vendor`（板厂）** 等 frontmatter 属性，与协作方提供的表格（Silicon Vendor / Soc / Boards / Board Vendor）一致。
+**开发板详情页**同时展示 **`silicon_vendor`（芯片厂商）与 `vendor`（板厂）** 等 frontmatter 属性，与协作方提供的表格（Silicon Vendor / Soc / Boards / Board Vendor）一致。
 
 ## 4. 内容仓库结构（目标与迁移说明）
 
@@ -96,7 +96,7 @@ cpu: SG2000
 cpu_core: XuanTie C906 + ARM Cortex-A53
 ram: 512MB
 vendor: Milk-V              # 板厂（Board Vendor）
-soc_vendor: Sophgo          # 芯片厂商（Silicon Vendor），侧栏第一层分组用此字段
+silicon_vendor: Sophgo      # 芯片厂商（Silicon Vendor），侧栏第一层分组用此字段
 ---
 ```
 
@@ -234,7 +234,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ## 11. 页面布局（线框）
 
-信息层级：**芯片厂商（soc_vendor）→ SoC → 开发板 → 示例**。厂商页、SoC 页为独立路由（见 §3 URL 表）；开发板与示例为 `/boards/...`。细部样式见 §12。
+信息层级：**芯片厂商（silicon_vendor）→ SoC → 开发板 → 示例**。厂商页为独立路由；SoC 路由仅作兼容重定向（见 §3 URL 表）；开发板与示例为 `/boards/...`。细部样式见 §12。
 
 ### 首页：侧栏（厂商→芯片→板子树）+ 卡片网格
 

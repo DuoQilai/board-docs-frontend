@@ -46,3 +46,17 @@ pnpm preview
 `test-doc/LicheePi4A/Coremark/example_Coremark_LPi4A.md`
 
 路由：`/` → `/boards/{board}/` → `/boards/{board}/{example}/`（另有厂商 / SoC 聚合页，见 `docs/design.md`）。
+
+## 更新内容子模块（test-doc）
+
+站点内容来自 `test-doc/` 子模块。**部署到 ruyisdk.org 前**，建议在构建前更新子模块（不要在运行时自动 `git pull`）。
+
+```bash
+cd test-doc
+git fetch origin main
+git pull --rebase origin main
+
+cd ..
+git add test-doc
+git commit -m "chore: bump test-doc submodule"
+```
