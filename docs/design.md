@@ -121,7 +121,7 @@ last_update: 2025-03-19
 
 ### 示例标题提取规则
 
-示例正文里 `#` 常为通用名（如「RuyiSDK 基础示例」），多示例会撞名。**列表与面包屑标题优先用示例子目录名**（`HelloWorld`、`Coremark`）；无目录名时再取 Markdown `#`。
+示例正文里 `#` 常为通用名（如「RuyiSDK 基础示例」），多示例会撞名。**列表与页面标题优先用示例子目录名**（`HelloWorld`、`Coremark`）；无目录名时再取 Markdown `#`。
 
 ## 5. 示例怎么分类？
 
@@ -260,7 +260,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
-│  首页 / Milk-V / SG2000 / Milk-V Duo S                    │
+│  ← 返回厂商页 / 返回首页（可选其一）                        │
 │  SG2000 · 512MB · Milk-V                                   │
 │  （README 简介区，prose）                                    │
 │                                                            │
@@ -278,7 +278,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
-│  首页 / Milk-V / SG2000 / Milk-V Duo S / HelloWorld       │
+│  ← 返回板子详情 / 返回首页（可选其一）                       │
 │  （meta：分类 · 系统 · 日期）                               │
 │                                                            │
 │  ┌─ Markdown 正文 ──────────────────────────────────────┐ │
@@ -317,7 +317,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ### 板子详情页
 
-- 面包屑：与 §3 URL 一致，含芯片厂商与 SoC（具体链到 `/vendors/…`、`/socs/…` 待实现时对齐），使用 `text-sm text-muted-foreground`
+- 顶部返回入口：提供「返回首页」与/或「返回厂商页」链接（无需全局面包屑），使用 `text-sm text-muted-foreground`
 - 板子 header：product 名 `text-2xl font-semibold`；属性区展示 frontmatter：**含 `silicon_vendor`（兼容 `soc_vendor`）、`vendor`（板厂）、`cpu`（SoC）、`cpu_core`、`ram` 等**，便于对照协作表格
 - 板子 README 介绍：用 `prose` 排版，若内容第一个标题与 header 重复则**跳过不渲染**
 - 示例列表用表格或分割线列表，每行显示：**目录名**（作为标题）+ 分类 Badge + 系统 + 日期；整行可点击，hover 高亮
@@ -325,7 +325,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ### 示例详情页
 
-- 面包屑：`首页 / {vendor} / {cpu} / {board.product} / {example.slug}`
+- 顶部返回入口：提供「返回板子详情」与/或「返回首页」链接（无需全局面包屑）
 - 顶部 meta 区：板子名小字 + 示例目录名大标题 + 分类标签 + 系统 + 日期
 - Markdown 正文区：`prose prose-slate dark:prose-invert max-w-none`
 - 代码块：`rehype-pretty-code` + `github-dark` 主题，圆角 `rounded-lg`，带语言标签

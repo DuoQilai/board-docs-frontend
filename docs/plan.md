@@ -161,11 +161,11 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ## Phase 5: 视觉打磨 + Bug 修复
 
-**目标**：修复已知问题，全面美化 UI，达到 matrix 站点同等品质。参照 `docs/design.md` §12 视觉规范。
+**目标**：修复已知问题，全面美化 UI，达到 matrix 站点同等品质，并完成构建/测试/双语等收尾工作。参照 `docs/design.md` §12 视觉规范。
 
 ### 已知问题（必修）
 
-0. **文档页回不了主页**：进入 `/boards/...` 或示例 Markdown 后缺少明确的回到 `/` 的入口。修复：侧栏顶部增加 **Logo + RuyiSDK Examples** 品牌区，整块可点击回到首页；并将页面内的返回链接/面包屑保持可用。
+0. **文档页回不了主页**：进入 `/boards/...` 或示例 Markdown 后缺少明确的回到 `/` 的入口。修复：侧栏顶部增加 **Logo + RuyiSDK Examples** 品牌区，整块可点击回到首页；并将页面内的返回链接保持可用。
 1. **示例标题撞名**：板子详情页示例列表全显示「RuyiSDK 基础示例」，无法区分 HelloWorld vs Coremark。修复：`data.ts` 中 `title` 优先用**目录名**（`ex.slug`），不再从 Markdown `#` 提取
 2. **板子详情 README 标题重复**：header 已显示 `board.product`，README 正文第一行又是同名 `#` 标题。修复：渲染 README body 时若第一个 `#` 与 product 相同则跳过
 
@@ -175,24 +175,18 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 3. **首页侧栏改为厂商→芯片→板子可折叠树**：参照 matrix 站点侧栏风格，桌面端显示，移动端隐藏（`docs/design.md` §12）
 4. **首页 hero 区**：大标题 + 副标题 + 居中搜索框，`py-10 sm:py-14`
 5. **板子卡片微动效**：`hover:shadow-md` + `hover:-translate-y-0.5 transition`
-6. **板子详情页**：面包屑（首页/厂商/芯片/板子）+ header + 分割线 + 示例表格（目录名 + Badge + 日期），全行可点击
-7. **示例详情页**：面包屑（首页/厂商/芯片/板子/示例）+ meta 区 + 分割线 + prose 排版；图片 `rounded-lg shadow-sm max-w-full`；代码块圆角 + 语言标签
+6. **板子详情页**：顶部返回入口（返回首页/厂商页）+ header + 分割线 + 示例表格（目录名 + Badge + 日期），全行可点击
+7. **示例详情页**：顶部返回入口（返回板子详情/首页）+ meta 区 + 分割线 + prose 排版；图片 `rounded-lg shadow-sm max-w-full`；代码块圆角 + 语言标签
 8. **全局**：页面 `max-w-6xl` 居中，统一间距 `px-4 sm:px-6`
 
-**验证**：`pnpm build` 通过；Mac Chrome 人眼确认首页板子卡片美观可辨、板子详情示例名正确、示例详情 Markdown 排版舒适。
-
----
-
-## Phase 6: 质量收尾 + 双语
-
-**目标**：构建通过、视觉一致、可部署。
+### 质量收尾 + 双语（并入 Phase 5）
 
 1. `pnpm build` 无报错
 2. 双语：板子介绍 README / README_zh 切换；示例正文当前仅中文，预留英文接口
 3. 按需写 Playwright e2e：首页加载、搜索、板子详情、示例详情
 4. 可选 CI：GitHub Actions `pnpm install && pnpm build`
 
-**验证**：`pnpm build` 退出码 0；Mac Chrome 通过 SSH 隧道人眼确认首页、板子详情、示例详情。
+**验证**：`pnpm build` 退出码 0；Mac Chrome 人眼确认首页板子卡片美观可辨、板子详情示例名正确、示例详情 Markdown 排版舒适。
 
 ---
 
@@ -204,7 +198,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ## 验收清单
 
-- [x] `pnpm build` 通过
+- [ ] `pnpm build` 通过
 - [ ] Mac SSH 隧道 + Chrome `http://localhost:3000`：首页加载正常
 - [ ] 首页：板子卡片网格 + 搜索过滤（`docs/design.md` §3 §11）
 - [ ] 点击板子卡片 → 板子详情页：显示示例列表
