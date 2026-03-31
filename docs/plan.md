@@ -165,11 +165,13 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ### 已知问题（必修）
 
+0. **文档页回不了主页**：进入 `/boards/...` 或示例 Markdown 后缺少明确的回到 `/` 的入口。修复：侧栏顶部增加 **Logo + RuyiSDK Examples** 品牌区，整块可点击回到首页；并将页面内的返回链接/面包屑保持可用。
 1. **示例标题撞名**：板子详情页示例列表全显示「RuyiSDK 基础示例」，无法区分 HelloWorld vs Coremark。修复：`data.ts` 中 `title` 优先用**目录名**（`ex.slug`），不再从 Markdown `#` 提取
 2. **板子详情 README 标题重复**：header 已显示 `board.product`，README 正文第一行又是同名 `#` 标题。修复：渲染 README body 时若第一个 `#` 与 product 相同则跳过
 
 ### 视觉打磨（必做）
 
+0. **侧栏品牌与搜索文案**：侧栏搜索框上方增加 **Logo + RuyiSDK Examples**；搜索文案统一中文（按钮/标签「搜索」，placeholder 为「搜索开发板、厂商、SoC、核心……」）。
 3. **首页侧栏改为厂商→芯片→板子可折叠树**：参照 matrix 站点侧栏风格，桌面端显示，移动端隐藏（`docs/design.md` §12）
 4. **首页 hero 区**：大标题 + 副标题 + 居中搜索框，`py-10 sm:py-14`
 5. **板子卡片微动效**：`hover:shadow-md` + `hover:-translate-y-0.5 transition`

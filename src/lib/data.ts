@@ -150,7 +150,7 @@ export type ChipGroup = {
 /** @deprecated Use SiliconVendorGroup + groupBoardsBySiliconVendorChip */
 export type VendorGroup = SiliconVendorGroup;
 
-/** Top-level = 芯片厂商 (soc_vendor) */
+/** Top-level = 芯片厂商 (silicon_vendor, backward-compatible: soc_vendor) */
 export type SiliconVendorGroup = {
   siliconVendor: string;
   chips: ChipGroup[];

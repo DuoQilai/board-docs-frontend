@@ -221,7 +221,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 | matrix 是否加「示例教程」外链 | 待定 |
 | 示例是否关联上游代码仓库链接 | 待定 |
 
-**已确定**：侧栏第一层分组用 **`soc_vendor`**；开发板详情展示 **`vendor`（板厂）与 `soc_vendor`（芯片厂商）**；厂商 / SoC / 开发板 URL 分别为 `/vendors/…`、`/socs/…`、`/boards/…`；各级入口文件名为 **`README.md`**。
+**已确定**：侧栏第一层分组用 **`silicon_vendor`**（兼容旧字段 `soc_vendor`）；开发板详情展示 **`vendor`（板厂）与 `silicon_vendor`（芯片厂商）**；厂商 / SoC / 开发板 URL 分别为 `/vendors/…`、`/socs/…`、`/boards/…`；各级入口文件名为 **`README.md`**。
 
 ## 10.1 仓库外协作流程（非本前端代码，仅供团队统一口径）
 
@@ -240,7 +240,10 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 
 ```text
 ┌──────────────┬─────────────────────────────────────────────┐
-│ [搜索框]      │  RuyiSDK Examples                           │
+│ [Logo +       │  RuyiSDK Examples                           │
+│  RuyiSDK      │  在 RISC-V 开发板上运行你的第一个程序          │
+│  Examples]    │                                             │
+│ [搜索框]      │  [搜索框]                                    │
 │              │  在 RISC-V 开发板上运行你的第一个程序          │
 │ ▼ Sophgo     │  [搜索框]                                    │
 │   ▼ SG2000   │                                             │
@@ -298,22 +301,24 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 ### 全局
 
 - 页面最大宽度 `max-w-6xl`（1152px），居中，两侧留 `px-4 sm:px-6`
-- 首页左侧侧栏：**soc_vendor → SoC（cpu）→ 板子**可折叠树，带搜索框，`w-64`；**仅桌面端**常驻并支持收起；移动端可不显示侧栏
+- 首页左侧侧栏：顶部为 **Logo + RuyiSDK Examples** 品牌区（可点击回到 `/`），其下为搜索框；导航树为 **silicon_vendor → SoC（cpu）→ 板子** 可折叠树，`w-64`；**仅桌面端**常驻并支持收起；移动端可不显示侧栏
 - 背景色 `bg-background`；卡片 `bg-card`；统一使用 CSS 变量色，不硬编码
 - 字体：继承 matrix 的 `--font-sans`（Open Sans 或系统无衬线）
 
 ### 首页
 
 - 顶部 hero 区：大标题 + 副标题 + 搜索框，垂直居中，`py-12 sm:py-16`
-- 搜索框宽度 `max-w-lg`，居中，带 `Search` 图标前缀
+- 搜索框宽度 `max-w-lg`，居中，带 `Search` 图标前缀；按钮/标签文案统一为「**搜索**」
 - 板子卡片采用 `hover:shadow-md` + `hover:-translate-y-0.5` 微动效
 - 卡片内部：product 名加粗 `text-lg font-semibold`；CPU 和 vendor 用 `text-muted-foreground text-sm`；右上角 Badge 显示「N 个示例」
 - 无结果态：虚线边框 + 提示文案
 
+侧栏搜索框 placeholder：**搜索开发板、厂商、SoC、核心……**
+
 ### 板子详情页
 
 - 面包屑：与 §3 URL 一致，含芯片厂商与 SoC（具体链到 `/vendors/…`、`/socs/…` 待实现时对齐），使用 `text-sm text-muted-foreground`
-- 板子 header：product 名 `text-2xl font-semibold`；属性区展示 frontmatter：**含 `soc_vendor`、`vendor`（板厂）、`cpu`（SoC）、`cpu_core`、`ram` 等**，便于对照协作表格
+- 板子 header：product 名 `text-2xl font-semibold`；属性区展示 frontmatter：**含 `silicon_vendor`（兼容 `soc_vendor`）、`vendor`（板厂）、`cpu`（SoC）、`cpu_core`、`ram` 等**，便于对照协作表格
 - 板子 README 介绍：用 `prose` 排版，若内容第一个标题与 header 重复则**跳过不渲染**
 - 示例列表用表格或分割线列表，每行显示：**目录名**（作为标题）+ 分类 Badge + 系统 + 日期；整行可点击，hover 高亮
 - 若示例数为 0，显示空态提示
