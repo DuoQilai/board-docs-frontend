@@ -36,6 +36,11 @@ const socSlug = socSlugFromCpu(board.cpu);
   <div class="py-8">
     <!-- Board header + 属性（与 frontmatter 对齐） -->
     <header class="mb-8">
+      <nav class="text-muted-foreground mb-2 flex flex-wrap items-center gap-1 text-sm">
+        <a href="/" class="hover:text-foreground hover:underline underline-offset-4">首页</a>
+        <span>/</span>
+        <span class="text-foreground">{board.product}</span>
+      </nav>
       <h1 class="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">{board.product}</h1>
       <dl class="text-muted-foreground mt-4 grid max-w-xl gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
         <div class="flex flex-col gap-0.5">
