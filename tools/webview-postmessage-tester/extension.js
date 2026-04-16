@@ -14,7 +14,7 @@ function activate(context) {
       }
     );
 
-    const testUrl = "http://localhost:4321/boards/LicheePi4A/Coremark/";
+    const testUrl = "http://localhost:3000/boards/LicheePi4A/Coremark/";
 
     panel.webview.html = `<!doctype html>
 <html>
