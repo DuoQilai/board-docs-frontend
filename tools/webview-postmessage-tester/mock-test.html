@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IDE WebView 按钮环境识别测试</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Open Sans", sans-serif; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+    .section { margin-bottom: 2rem; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .log { background: #f3f4f6; padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0; white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+    .button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+    button { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #ccc; background: white; cursor: pointer; }
+    button.active { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+    #payload-log { min-height: 120px; }
+    #button-container { padding: 1rem 0; border-bottom: 1px solid #eee; margin-bottom: 1rem; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>IDE WebView "在 VS Code 中使用" 按钮 — 环境识别测试</h1>
+  <p>本页 mock 三种环境：浏览器、VS Code WebView、Eclipse WebView，验证按钮显隐和 postMessage payload 是否正确。</p>
+
+  <div class="section">
+    <h2>1. 切换环境 mock</h2>
+    <div class="button-row">
+      <button id="env-browser" class="active">普通浏览器</button>
+      <button id="env-vscode">VS Code WebView (UA: Code/)</button>
+      <button id="env-eclipse-ua">Eclipse WebView (UA contains Eclipse)</button>
+      <button id="env-eclipse-inject">Eclipse WebView (host injected flag)</button>
+    </div>
+    <div class="log" id="env-log">等待选择...</div>
+  </div>
+
+  <div class="section">
+    <h2>2. 按钮区域（和生产环境对齐）</h2>
+    <div id="button-container">
+      <!-- 跟 src/pages/boards/[board]/[example].astro 完全一样 -->
+      <button
+        id="use-in-vscode-button"
+        type="button"
+        class="bg-primary text-primary-foreground hover:bg-primary/90 hidden shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors"
+        data-model="Lichee Pi 4A"
+        data-profile="Coremark"
+        data-source-doc-url="/boards/LicheePi4A/Coremark/example.md"
+      >
+        在 VS Code 中使用
+      </button>
+    </div>
+    <h3>最后一次 postMessage payload：</h3>
+    <div class="log" id="payload-log">(点击按钮才会出现)</div>
+  </div>
+
+  <div class="section">
+    <h2>3. 测试结果说明</h2>
+    <ul>
+      <li><b>普通浏览器</b>：按钮不应该显示 → 应该一直是隐藏的</li>
+      <li><b>VS Code WebView</b>：按钮应该显示 → 点击后弹出/打印正确 payload</li>
+      <li><b>Eclipse WebView (UA/注入)</b>：按钮应该显示 → 点击后弹出/打印正确 payload</li>
+      <li>不管是哪个 IDE，payload 结构应该完全一致：type=copilot, url 为绝对 URL，model 等于开发板型号，profile 等于示例名称</li>
+    </ul>
+  </div>
+
+<script>
+(function() {
+  // 保存原始 globals，方便切换 mock 时恢复
+  const originalNavigatorUserAgent = navigator.userAgent;
+  const originalWindow = window;
+  let lastPayload = null;
+
+  const envLogEl = document.getElementById('env-log');
+  const payloadLogEl = document.getElementById('payload-log');
+  const buttonEl = document.getElementById('use-in-vscode-button');
+
+  // mock vscode.postMessage，捕获 payload
+  function mockVSCodeBridge() {
+    // 把 window.vscode 或者 injected bridge 替换成 mock，把 payload 打在页面上
+    const mockPostMessage = (payload) => {
+      lastPayload = payload;
+      payloadLogEl.textContent = JSON.stringify(payload, null, 2);
+      console.log('[mock postMessage] payload:', payload);
+      alert('收到 postMessage 消息，内容在页面 "最后一次 payload" 区域和控制台打印');
+    };
+    window.__RUYI_ECLIPSE_VSCODE_BRIDGE__ = { postMessage: mockPostMessage };
+    window.vscode = { postMessage: mockPostMessage };
+    window.acquireVsCodeApi = () => ({ postMessage: mockPostMessage });
+  }
+
+  // 重置为原始状态，清除所有 mocks
+  function resetMocks() {
+    // 恢复 userAgent （用 Object.defineProperty 因为它是只读）
+    Object.defineProperty(navigator, 'userAgent', {
+      value: originalNavigatorUserAgent,
+      configurable: true,
+    });
+    // 清除 eclipse 注入 flag
+    delete window.__RUYI_ECLIPSE_WEBVIEW__;
+    // 隐藏按钮，跟原始状态对齐
+    if (buttonEl) {
+      buttonEl.classList.add('hidden');
+    }
+    lastPayload = null;
+    payloadLogEl.textContent = '(点击按钮才会出现)';
+  }
+
+  // 重新运行生产代码中的逻辑：判断环境，决定显示按钮，绑定点击
+  function runProductionLogic() {
+    // 把生产环境代码原样拷贝过来，保证跟线上一致
+    const button = document.getElementById("use-in-vscode-button");
+    if (!(button instanceof HTMLButtonElement)) return;
+
+    const isVSCodeWebView = navigator.userAgent.includes("Code/");
+    const isEclipseWebView = (typeof (window as any).__RUYI_ECLIPSE_WEBVIEW__ !== "undefined" && (window as any).__RUYI_ECLIPSE_WEBVIEW__ === true) ||
+      navigator.userAgent.includes("Eclipse");
+    const isIdeWebView = isVSCodeWebView || isEclipseWebView;
+
+    const logLines = [
+      `isVSCodeWebView = ${JSON.stringify(isVSCodeWebView)}`,
+      `isEclipseWebView = ${JSON.stringify(isEclipseWebView)}`,
+      `isIdeWebView = ${JSON.stringify(isIdeWebView)}`,
+      ``,
+      isIdeWebView ? '→ 按钮会显示' : '→ 按钮会隐藏',
+    ];
+    envLogEl.textContent = logLines.join('\n');
+
+    if (isIdeWebView) {
+      button.classList.remove("hidden");
+      // 绑定点击，跟生产逻辑对齐
+      button.addEventListener("click", () => {
+        const model = button.dataset.model ?? "";
+        const profile = button.dataset.profile ?? "";
+        const sourceDocUrl = button.dataset.sourceDocUrl ?? "";
+        const url = sourceDocUrl ? new URL(sourceDocUrl, window.location.origin).href : window.location.href;
+        const vscode =
+          typeof window.acquireVsCodeApi === "function"
+            ? window.acquireVsCodeApi()
+            : (window.vscode || (window as any).__RUYI_ECLIPSE_VSCODE_BRIDGE__);
+
+        if (!vscode?.postMessage) {
+          alert('vscode.postMessage 不存在！mock 有误？');
+          return;
+        }
+        vscode.postMessage({
+          type: "copilot",
+          url,
+          model,
+          profile,
+        });
+      });
+    }
+  }
+
+  // 绑定环境切换按钮事件
+  document.getElementById('env-browser').addEventListener('click', function() {
+    resetMocks();
+    document.querySelectorAll('.button-row button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    mockVSCodeBridge();
+    runProductionLogic();
+  });
+  document.getElementById('env-vscode').addEventListener('click', function() {
+    resetMocks();
+    document.querySelectorAll('.button-row button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    // mock VS Code UA
+    const mockUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.115.0 Chrome/142.0.7444.265 Electron/39.8.5 Safari/537.36';
+    Object.defineProperty(navigator, 'userAgent', {
+      value: mockUA,
+      configurable: true,
+    });
+    mockVSCodeBridge();
+    runProductionLogic();
+  });
+  document.getElementById('env-eclipse-ua').addEventListener('click', function() {
+    resetMocks();
+    document.querySelectorAll('.button-row button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    // mock Eclipse UA
+    const mockUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geclipse) Chrome/120.0.0.0 Safari/537.36 Eclipse/4.32.0';
+    Object.defineProperty(navigator, 'userAgent', {
+      value: mockUA,
+      configurable: true,
+    });
+    mockVSCodeBridge();
+    runProductionLogic();
+  });
+  document.getElementById('env-eclipse-inject').addEventListener('click', function() {
+    resetMocks();
+    document.querySelectorAll('.button-row button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    // 不修改 UA，注入 host 标识即可
+    (window as any).__RUYI_ECLIPSE_WEBVIEW__ = true;
+    mockVSCodeBridge();
+    runProductionLogic();
+  });
+
+  // 初始化：默认普通浏览器
+  mockVSCodeBridge();
+  runProductionLogic();
+})();
+</script>
+</body>
+</html>

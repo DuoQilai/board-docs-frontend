@@ -31,21 +31,38 @@ vscode.postMessage({
 
 ### 1) Eclipse 环境识别（UA 子串）
 
-和 VS Code 的 `Code/` 类似，Eclipse 也需要一个**稳定的 UA 关键字**用于识别 Eclipse WebView。
+和 VS Code 的 `Code/` 类似，Eclipse 也需要一个**稳定的特征**用于识别 Eclipse WebView。
 
-- **当前占位关键字**：`placerhodelr`（仅占位，后续必须替换为真实 UA 特征）
-- **最终逻辑建议**：
-  - `isVSCodeWebView = navigator.userAgent.includes("Code/")`
-  - `isEclipseWebView = navigator.userAgent.includes("<ECLIPSE_UA_KEYWORD>")`
-  - `isIdeWebView = isVSCodeWebView || isEclipseWebView`
-  - 按钮展示条件改为 `isIdeWebView`
+#### 推荐识别优先级（更接近真实工程）
+
+1) **宿主注入标识（推荐，最稳）**  
+Eclipse 宿主在页面 `window` 上注入一个只在 Eclipse WebView 存在的标识，例如：
+
+- `window.__RUYI_ECLIPSE_WEBVIEW__ = true`
+
+前端优先用它判断：
+
+- `isEclipseWebView = (window.__RUYI_ECLIPSE_WEBVIEW__ === true)`
+
+2) **UA 关键字兜底（可用但不如注入稳）**  
+如果短期内 Eclipse 端没法注入标识，再用 UA 子串兜底。你现在没有 Eclipse UA 样例时，可以先按“**大概率可匹配**”的关键字写成可配置列表，等拿到真实 UA 再收敛：
+
+- 默认候选：`"Eclipse"`（不少 Eclipse/插件宿主会在 UA 或相关标识里包含该词）
+- 如果你拿到更稳定的关键字（比如 `"Eclipse/"`、某插件名、某 WebView 宿主标识），用它替换
+
+3) **最终按钮展示条件**（VS Code + Eclipse 任一命中即显示）
+
+- `isVSCodeWebView = navigator.userAgent.includes("Code/")`
+- `isEclipseWebView = (window.__RUYI_ECLIPSE_WEBVIEW__ === true) || navigator.userAgent.includes("Eclipse")`
+- `isIdeWebView = isVSCodeWebView || isEclipseWebView`
+- 按钮展示条件改为 `isIdeWebView`
 
 #### 获取 Eclipse UA 的推荐方法
 
 - 在 Eclipse 内置 WebView 打开任意页面，在 DevTools Console 执行 `navigator.userAgent` 并复制出来。
 - 或由 Eclipse 端开发在 WebView 宿主侧打印 UA，并在对接时提供样例。
 
-> 关键点：不要依赖过于“脆”的字段（比如某个版本号），优先选一个长期不变的产品标识子串。
+> 关键点：不要依赖过于“脆”的字段（比如某个版本号），优先选一个长期不变的产品标识子串；更推荐“宿主注入标识”这种可控方案。
 
 ### 2) WebView bridge 约定（推荐统一为 `vscode.postMessage`）
 

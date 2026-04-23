@@ -86,7 +86,10 @@ const sourceDocUrl = `/${rawDocPath}`;
   const button = document.getElementById("use-in-vscode-button");
   if (button instanceof HTMLButtonElement) {
     const isVSCodeWebView = navigator.userAgent.includes("Code/");
-    if (isVSCodeWebView) {
+    const isEclipseWebView = (typeof (window as any).__RUYI_ECLIPSE_WEBVIEW__ !== "undefined" && (window as any).__RUYI_ECLIPSE_WEBVIEW__ === true) ||
+      navigator.userAgent.includes("Eclipse");
+    const isIdeWebView = isVSCodeWebView || isEclipseWebView;
+    if (isIdeWebView) {
       button.classList.remove("hidden");
       button.addEventListener("click", () => {
         const model = button.dataset.model ?? "";
@@ -96,7 +99,7 @@ const sourceDocUrl = `/${rawDocPath}`;
         const vscode =
           typeof window.acquireVsCodeApi === "function"
             ? window.acquireVsCodeApi()
-            : window.vscode;
+            : (window.vscode || (window as any).__RUYI_ECLIPSE_VSCODE_BRIDGE__);
 
         if (!vscode?.postMessage) return;
         vscode.postMessage({
