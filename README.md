@@ -1,57 +1,80 @@
 # RuyiSDK Examples 前端
 
-用网页呈现「在 RISC-V 开发板上怎么用 RuyiSDK 跑示例」的教程；与 [支持矩阵](https://matrix.ruyisdk.org/) 并列，数据可互链，代码仓库独立。
+这个项目把 `ruyisdk/board-docs` 里的开发板示例文档渲染成网页，方便按「板子 -> 示例」浏览和检索。
 
 ## 技术栈
 
-Astro 6、React、TypeScript、Tailwind CSS v4、shadcn/ui（与 support-matrix-frontend 同栈）。
+Astro 6、React、TypeScript、Tailwind CSS v4、shadcn/ui。
 
 ## 快速开始
 
-需要：**Node.js ≥ 22.12.0**、**pnpm**（可用 `corepack enable`）、**git**（要拉子模块）。
+先准备环境：
+
+- Node.js >= 22.12.0
+- pnpm（可先执行 `corepack enable`）
+- git（需要拉取子模块）
+
+然后按顺序执行：
 
 ```bash
 git clone --recurse-submodules <你的仓库 URL>
-cd ruyisdk-examples-frontend
+cd board-docs-frontend
 
-# 若已克隆但没带子模块
+# 如果你之前 clone 时没带 --recurse-submodules，再补这一步
 git submodule update --init --recursive
 
 pnpm install
-pnpm dev          # 默认 http://localhost:3000；会先尝试释放 3000 端口（依赖 bash）
-pnpm dev:only     # 不杀端口、不依赖 bash
-PORT=3001 pnpm dev
+pnpm dev
+```
 
+启动后默认访问 `http://localhost:3000`。
+
+常用命令：
+
+```bash
+pnpm dev:only     # 直接启动，不做端口清理
+PORT=3001 pnpm dev
 pnpm build
 pnpm preview
 ```
 
-**Mac**：一般装好 Node、pnpm、git 后，按上面即可；`pnpm dev` 与 `pnpm dev:only` 都能用。
+## 不同系统说明
 
-**Windows**：优先用 **`pnpm dev:only`** 起站点（`pnpm dev` 会调 bash，未装 Git for Windows / 未把 bash 加进 PATH 时会失败）。改端口：PowerShell 用 `$env:PORT=3001; pnpm dev:only`，CMD 用 `set PORT=3001&& pnpm dev:only`。
-
-**Linux**：若缺 `fuser` 可装 `psmisc` 或改用 `pnpm dev:only`。端口被占用时不会自动换端口，可改 `PORT`。首页没有板子内容时，先确认已执行 submodule 命令。
+- macOS：`pnpm dev` 和 `pnpm dev:only` 都可以直接用。
+- Windows：优先用 `pnpm dev:only`。`pnpm dev` 依赖 bash，未安装 Git Bash 时可能失败。  
+  - PowerShell 改端口：`$env:PORT=3001; pnpm dev:only`  
+  - CMD 改端口：`set PORT=3001&& pnpm dev:only`
+- Linux：`pnpm dev` 会尝试清理端口占用（优先用 `fuser`，没有就尝试 `lsof`）。如果都没有，改用 `pnpm dev:only` 即可。
 
 ## 目录结构（节选）
 
-- `docs/` — 设计（`design.md`）、计划（`plan.md`）等  
-- `src/` — 页面、组件、`lib/data.ts`（读 `board-docs`）  
-- `board-docs/` — 板卡文档内容（git submodule，来自 `ruyisdk/board-docs`）  
-- `support-matrix-frontend/` — 参考用 submodule，勿改其代码  
+- `src/`：页面和组件代码
+- `src/lib/data.ts`：读取并解析 `board-docs` 内容
+- `board-docs/`：文档内容子模块（来源：`ruyisdk/board-docs`）
+- `docs/`：设计和计划文档
 
-## 内容与路由
+## 内容组织与路由
 
-`board-docs/` 下按「板子 → 示例子目录 → .md」组织，例如：
+站点支持两种内容布局：
 
-`board-docs/LicheePi4A/Coremark/example_Coremark_LPi4A.md`
+- `board-docs/{board}/{example}/*.md`
+- `board-docs/boards/{board}/{example}/*.md`
 
-内容仓库里可能还会有 `templates/`（用于贡献者写文档的模板/PR 模板等），**站点不会展示它**（不会出现在侧栏/搜索，也不会生成 `/boards/templates/` 路由）。
+例如：
 
-路由：`/` → `/boards/{board}/` → `/boards/{board}/{example}/`（另有厂商 / SoC 聚合页，见 `docs/design.md`）。
+- `board-docs/LicheePi4A/Coremark/example_Coremark_LPi4A.md`
 
-## 更新内容子模块（board-docs）
+`templates/` 目录会被自动忽略，不会出现在页面和路由里。
 
-站点内容来自 `board-docs/` 子模块（`ruyisdk/board-docs`）。**部署到 ruyisdk.org 前**，建议在构建前更新子模块（不要在运行时自动 `git pull`）。
+主要路由：
+
+- `/`
+- `/boards/{board}/`
+- `/boards/{board}/{example}/`
+
+## 更新 `board-docs` 子模块
+
+部署前建议先更新 `board-docs` 到最新提交，再构建站点。
 
 ```bash
 cd board-docs
