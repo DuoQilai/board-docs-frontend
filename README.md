@@ -74,7 +74,9 @@ pnpm preview
 
 ## 更新 `board-docs` 子模块
 
-部署前建议先更新 `board-docs` 到最新提交，再构建站点。
+GitHub Actions（`.github/workflows/update-submodule.yml`）每天自动拉取 [ruyisdk/board-docs](https://github.com/ruyisdk/board-docs) 最新提交：有更新则验证 `pnpm build` 通过后直接推送到 `main`，Cloudflare Pages 会自动重新部署。
+
+本地手动更新：
 
 ```bash
 cd board-docs
@@ -85,3 +87,24 @@ cd ..
 git add board-docs
 git commit -m "chore: bump board-docs submodule"
 ```
+
+## 示例分类
+
+示例 frontmatter 的 `status` 字段使用下列 slug（定义见 `src/lib/status-labels.ts`）：
+
+| slug | 中文 |
+| --- | --- |
+| `basics` | 基础示例 |
+| `peripheral` | 外设控制 |
+| `communication` | 通信接口 |
+| `network` | 网络通信 |
+| `system` | 系统编程 |
+| `multimedia` | 多媒体应用 |
+| `computer-vision` | 计算机视觉 |
+| `ai` | 人工智能 |
+| `crypto` | 加密安全 |
+| `compression` | 数据压缩 |
+| `gui` | 图形界面 |
+| `benchmark` | 性能测试 |
+
+旧值 `application`、`others`、`good` 等会自动映射到新分类。

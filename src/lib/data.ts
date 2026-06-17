@@ -1,6 +1,7 @@
 import { parse as parseYaml } from "yaml";
+import { normalizeExampleStatus, type ExampleStatus } from "./status-labels";
 
-export type ExampleStatus = "basics" | "peripheral" | "benchmark" | "application";
+export type { ExampleStatus };
 
 export type ExampleMeta = {
   boardSlug: string;
@@ -97,15 +98,6 @@ function firstHeading(body: string): string | undefined {
   return m?.[1]?.trim();
 }
 
-function normalizeStatus(raw: unknown): ExampleStatus {
-  if (raw === "basics" || raw === "peripheral" || raw === "benchmark" || raw === "application") {
-    return raw;
-  }
-  /** @deprecated 旧稿用 others，现并入性能评测 */
-  if (raw === "others") return "benchmark";
-  return "application";
-}
-
 function parseBoardSlugFromReadmeKey(key: string): string | null {
   const norm = key.replace(/\\/g, "/");
   // Support both:
@@ -173,7 +165,7 @@ function buildExampleMeta(globKey: string, raw: string, boardSlug: string, examp
     boardSlug,
     slug: exampleSlug,
     title: String(title),
-    status: normalizeStatus(data["status"]),
+    status: normalizeExampleStatus(data["status"]),
     sys,
     lastUpdate,
     mdGlobKey: globKey,
