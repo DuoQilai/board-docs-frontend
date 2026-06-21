@@ -4,24 +4,17 @@
 
 ## 在线地址
 
-**https://board-docs-frontend.pages.dev/**
+https://board-docs-frontend.pages.dev/
 
-公开可访问。本地开发对照：`pnpm dev` → `http://localhost:3000`。
+本地开发：`pnpm dev` → http://localhost:3000
 
-## 部署（当前已知）
+## 部署
 
-本仓库**没有** Dockerfile、学校内网部署脚本等自建托管配置。
+- 代码仓库：https://github.com/DuoQilai/board-docs-frontend
+- `main` 更新 → 自动构建上线
+- 文档子模块每天自动同步（见下方）
 
-| 项 | 状态 |
-| --- | --- |
-| 线上域名 | `board-docs-frontend.pages.dev`（`.pages.dev` 为 Cloudflare Pages 常用域名） |
-| HTTP 响应 | 访问线上地址可见 `server: cloudflare` |
-| 代码仓库 | [DuoQilai/board-docs-frontend](https://github.com/DuoQilai/board-docs-frontend) |
-| 自动发布 | `main` 推送后由托管方构建部署（具体账号与面板需维护者确认） |
-
-**未核实项**（需问吴老师或仓库管理员）：是否另有中科院自建服务器、是否绑定自定义域名、Cloudflare 账号归属。
-
-访问统计方案取决于实际托管方式——见仓库根目录 `cloudflare-web-analytics.md`（仅适用于当前 Cloudflare 托管情形；若改自建服务器需另定方案）。
+托管在 Cloudflare 还是学校自建服务器，以维护者为准。访问统计需要老师提供什么，见 [web-analytics.md](./web-analytics.md)。
 
 ## 技术栈
 
