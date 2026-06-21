@@ -2,6 +2,27 @@
 
 这个项目把 `ruyisdk/board-docs` 里的开发板示例文档渲染成网页，方便按「板子 -> 示例」浏览和检索。
 
+## 在线地址
+
+**https://board-docs-frontend.pages.dev/**
+
+公开可访问。本地开发对照：`pnpm dev` → `http://localhost:3000`。
+
+## 部署（当前已知）
+
+本仓库**没有** Dockerfile、学校内网部署脚本等自建托管配置。
+
+| 项 | 状态 |
+| --- | --- |
+| 线上域名 | `board-docs-frontend.pages.dev`（`.pages.dev` 为 Cloudflare Pages 常用域名） |
+| HTTP 响应 | 访问线上地址可见 `server: cloudflare` |
+| 代码仓库 | [DuoQilai/board-docs-frontend](https://github.com/DuoQilai/board-docs-frontend) |
+| 自动发布 | `main` 推送后由托管方构建部署（具体账号与面板需维护者确认） |
+
+**未核实项**（需问吴老师或仓库管理员）：是否另有中科院自建服务器、是否绑定自定义域名、Cloudflare 账号归属。
+
+访问统计方案取决于实际托管方式——见仓库根目录 `cloudflare-web-analytics.md`（仅适用于当前 Cloudflare 托管情形；若改自建服务器需另定方案）。
+
 ## 技术栈
 
 Astro 6、React、TypeScript、Tailwind CSS v4、shadcn/ui。
@@ -74,7 +95,7 @@ pnpm preview
 
 ## 更新 `board-docs` 子模块
 
-GitHub Actions（`.github/workflows/update-submodule.yml`）每天自动拉取 [ruyisdk/board-docs](https://github.com/ruyisdk/board-docs) 最新提交：有更新则验证 `pnpm build` 通过后直接推送到 `main`，Cloudflare Pages 会自动重新部署。
+GitHub Actions（`.github/workflows/update-submodule.yml`）每天自动拉取 [ruyisdk/board-docs](https://github.com/ruyisdk/board-docs) 最新提交：有更新则验证 `pnpm build` 通过后直接推送到 `main`，触发线上重新部署。
 
 本地手动更新：
 
