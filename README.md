@@ -11,10 +11,8 @@ https://board-docs-frontend.pages.dev/
 ## 部署
 
 - 代码仓库：https://github.com/DuoQilai/board-docs-frontend
-- `main` 更新 → 自动构建上线
-- 文档子模块每天自动同步（见下方）
-
-托管在 Cloudflare 还是学校自建服务器，以维护者为准。访问统计需要老师提供什么，见 [web-analytics.md](./web-analytics.md)。
+- 托管：**Cloudflare Pages**，`main` 更新自动上线
+- 访问统计见 [docs/web-analytics.md](./docs/web-analytics.md)
 
 ## 技术栈
 
@@ -60,12 +58,18 @@ pnpm preview
   - CMD 改端口：`set PORT=3001&& pnpm dev:only`
 - Linux：`pnpm dev` 会尝试清理端口占用（优先用 `fuser`，没有就尝试 `lsof`）。如果都没有，改用 `pnpm dev:only` 即可。
 
-## 目录结构（节选）
+## 目录结构
 
-- `src/`：页面和组件代码
-- `src/lib/data.ts`：读取并解析 `board-docs` 内容
-- `board-docs/`：文档内容子模块（来源：`ruyisdk/board-docs`）
-- `docs/`：设计和计划文档
+```
+board-docs-frontend/
+├── src/              # 页面、组件、数据层
+├── public/           # 静态资源
+├── board-docs/       # 内容子模块（ruyisdk/board-docs）
+├── docs/             # 项目文档（设计、计划、运维说明）
+├── scripts/          # 开发脚本
+├── tools/            # 本地调试工具
+└── .github/workflows/  # CI（子模块自动同步等）
+```
 
 ## 内容组织与路由
 

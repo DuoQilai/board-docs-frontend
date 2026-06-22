@@ -24,6 +24,3 @@ pnpm-debug.log*
 
 # temporary scaffolding
 .scaffold/
-
-# docs: ignore new local-only files; already-tracked docs stay tracked
-docs/
