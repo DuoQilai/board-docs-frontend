@@ -4,6 +4,37 @@
 
 **老师不用改代码、不用配环境变量。** 学生收到信息后自己处理。
 
+## 学生收到 token 后
+
+1. 脚本已加在 `src/layouts/Layout.astro`（全局每页加载）
+2. 推 `main` → 等部署完成
+3. 验收见下方「怎么验收」
+
+老师不用再做配置。token 也可通过环境变量 `PUBLIC_CF_WEB_ANALYTICS_TOKEN` 覆盖（可选）。
+
+## 怎么验收
+
+**学生自己能验：**
+
+1. 打开 https://board-docs-frontend.pages.dev/
+2. 浏览器 **查看网页源代码**（Ctrl+U）
+3. 搜 `cloudflareinsights` 或 `beacon.min.js` → 有 = 脚本上了
+4. 可选：F12 → Network → 刷新 → 有对 `cloudflareinsights.com` 的请求
+
+**看访问量数据：**
+
+- 登录 https://dash.cloudflare.com → **Web Analytics**
+- **只有有 Cloudflare 账号的人能看**（通常是老师）
+- 数据不是实时的，可能要等几小时才有数
+- 学生要看 → 让老师邀请你为 Member，或让老师截图
+
+## 老师控制台能看到什么
+
+- 今天/本周多少人来过（PV、访客数）
+- 哪些页面最热（如 `/boards/LicheePi4A/`）
+- 大概从哪来（国家/地区）
+- 页面加载速度
+
 ---
 
 ## 先确认：网站托管在哪？

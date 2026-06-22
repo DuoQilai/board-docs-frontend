@@ -10,6 +10,10 @@ interface Props {
 
 const { title = "RuyiSDK Examples", description = "RISC-V 开发板示例教程" } = Astro.props;
 const boards = getAllBoards();
+// Beacon token is public (ends up in page HTML). Override via PUBLIC_CF_WEB_ANALYTICS_TOKEN if needed.
+const cfAnalyticsToken =
+  import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN ?? "05527889bb294c22b007430b9812323a";
+const cfBeacon = JSON.stringify({ token: cfAnalyticsToken });
 ---
 
 <!doctype html>
@@ -23,6 +27,11 @@ const boards = getAllBoards();
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={cfBeacon}
+    />
   </head>
   <body>
     <div class="mx-auto flex max-w-7xl">
