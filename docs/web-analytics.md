@@ -28,8 +28,13 @@
 **学生**（不需要 Cloudflare 密码）：
 
 1. 打开 https://board-docs-frontend.pages.dev/
-2. `Ctrl+U` 看源代码，搜 `beacon.min.js` → 有 = 脚本生效
-3. 可选：F12 → Network → 刷新，看有没有 `cloudflareinsights.com` 请求
+2. 看网页源代码，搜 `beacon.min.js` → 有 = 脚本生效
+   - **Mac（Chrome / Safari）**：`⌥⌘U`（Option + Command + U）
+   - **Windows / Linux**：`Ctrl+U`
+   - 或：页面空白处右键 →「查看网页源代码」
+3. 可选：打开开发者工具 → **Network** → 刷新，看有没有 `cloudflareinsights.com` 请求
+   - **Mac（Chrome）**：`⌥⌘I`（Option + Command + I）
+   - **Windows / Linux**：`F12` 或 `Ctrl+Shift+I`
 
 **老师**（需要自己的 Cloudflare 账号）：
 
