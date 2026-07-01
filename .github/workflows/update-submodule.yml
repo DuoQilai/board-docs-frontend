@@ -34,6 +34,10 @@ jobs:
           else
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "board-docs updated: $BEFORE → $AFTER"
+            echo "--- Changed files ---"
+            git -C board-docs diff --stat $BEFORE..$AFTER
+            echo "--- Affected boards ---"
+            git -C board-docs diff --name-only $BEFORE..$AFTER | sed 's|^board-docs/||' | cut -d'/' -f1 | sort -u
           fi
 
       - uses: pnpm/action-setup@v4
@@ -63,3 +67,7 @@ jobs:
           fi
           git commit -m "chore: bump board-docs submodule"
           git push
+
+      - name: Notify Cloudflare Pages to deploy
+        if: steps.changes.outputs.changed == 'true'
+        run: curl -sS -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/3af6ba0c-db9b-4807-bd7a-863dbdaf5205"
