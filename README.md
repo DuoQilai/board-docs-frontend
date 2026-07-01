@@ -90,16 +90,27 @@ board-docs-frontend/
 - `/boards/{board}/`
 - `/boards/{board}/{example}/`
 
-## 更新 `board-docs` 子模块
+## 自动同步与部署
 
-GitHub Actions（`.github/workflows/update-submodule.yml`）每天自动拉取 [ruyisdk/board-docs](https://github.com/ruyisdk/board-docs) 最新提交：有更新则验证 `pnpm build` 通过后直接推送到 `main`，触发线上重新部署。
+工作流 `.github/workflows/update-submodule.yml` 每天 12:00（北京时间）执行：
 
-本地手动更新：
+1. 拉取 `ruyisdk/board-docs` 最新内容
+2. `pnpm build` 验证
+3. 验证通过则推送到 `main`
+4. 通过 Cloudflare Pages Deploy Hook 通知线上重新构建
+
+每次同步时 Actions log 会输出受影响的板子列表，方便确认变更范围。
+
+### 手动触发
+
+进 [Actions 页面](https://github.com/EnzoDing-rgb/ruyisdk-examples-frontend/actions/workflows/update-submodule.yml)，点 "Run workflow" 即可。
+
+### 本地手动更新子模块
 
 ```bash
 cd board-docs
 git fetch origin main
-git pull --rebase origin main
+git checkout origin/main
 
 cd ..
 git add board-docs
