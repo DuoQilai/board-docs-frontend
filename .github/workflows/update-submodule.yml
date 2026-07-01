@@ -21,7 +21,7 @@ jobs:
         id: changes
         run: |
           set -e
-          git submodule init board-docs
+          git submodule update --init board-docs
           cd board-docs
           git fetch origin main
           BEFORE=$(git rev-parse HEAD)
@@ -48,7 +48,6 @@ jobs:
       - name: Verify build
         if: steps.changes.outputs.changed == 'true'
         run: |
-          git submodule update --init board-docs
           pnpm install --frozen-lockfile
           pnpm build
 
