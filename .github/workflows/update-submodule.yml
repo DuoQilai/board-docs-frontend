@@ -16,18 +16,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-          submodules: recursive
 
-      - name: Update board-docs submodule
+      - name: Init and update board-docs submodule
         id: changes
         run: |
-          git submodule update --remote board-docs
-          if git diff --quiet board-docs; then
+          set -e
+          git submodule init board-docs
+          cd board-docs
+          git fetch origin main
+          BEFORE=$(git rev-parse HEAD)
+          git checkout origin/main
+          AFTER=$(git rev-parse HEAD)
+          cd ..
+          if [ "$BEFORE" = "$AFTER" ]; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "board-docs already up to date"
+            echo "board-docs already at $AFTER"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "board-docs submodule has updates"
+            echo "board-docs updated: $BEFORE → $AFTER"
           fi
 
       - uses: pnpm/action-setup@v4
@@ -42,6 +48,7 @@ jobs:
       - name: Verify build
         if: steps.changes.outputs.changed == 'true'
         run: |
+          git submodule update --init board-docs
           pnpm install --frozen-lockfile
           pnpm build
 

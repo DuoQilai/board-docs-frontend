@@ -1,3 +1,4 @@
 [submodule "board-docs"]
 	path = board-docs
 	url = https://github.com/ruyisdk/board-docs.git
+	branch = main
