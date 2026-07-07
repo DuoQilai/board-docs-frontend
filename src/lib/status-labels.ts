@@ -29,6 +29,7 @@ export const STATUS_LABEL_ZH: Record<ExampleStatus, string> = {
   compression: "数据压缩",
   gui: "图形界面",
   benchmark: "性能测试",
+  application: "应用与综合",
 };
 
 const STATUS_SET = new Set<string>(EXAMPLE_STATUSES);
@@ -43,7 +44,6 @@ export function normalizeExampleStatus(raw: unknown): ExampleStatus {
   if (STATUS_SET.has(key)) return key as ExampleStatus;
 
   const legacy: Record<string, ExampleStatus> = {
-    application: "system",
     others: "benchmark",
     good: "basics",
     wip: "system",
@@ -51,5 +51,5 @@ export function normalizeExampleStatus(raw: unknown): ExampleStatus {
   };
   if (legacy[key]) return legacy[key];
 
-  return "system";
+  return "application";
 }
