@@ -12,6 +12,7 @@ export const EXAMPLE_STATUSES = [
   "compression",
   "gui",
   "benchmark",
+  "application",
 ] as const;
 
 export type ExampleStatus = (typeof EXAMPLE_STATUSES)[number];
