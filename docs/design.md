@@ -107,7 +107,7 @@ silicon_vendor: Sophgo      # 芯片厂商（Silicon Vendor），侧栏第一层
 sys: buildroot
 sys_ver: v1.1.4
 sys_var: v1
-category: basics
+category: getting-started
 last_update: 2025-03-19
 ---
 ```
@@ -121,7 +121,7 @@ last_update: 2025-03-19
 
 ### 示例标题提取规则
 
-示例正文里 `#` 常为通用名（如「RuyiSDK 基础示例」），多示例会撞名。**列表与页面标题优先用示例子目录名**（`HelloWorld`、`Coremark`）；无目录名时再取 Markdown `#`。
+示例正文里 `#` 常为通用分类名（如「RuyiSDK 入门示例」），多示例会撞名。**列表与页面标题优先用示例子目录名**（`HelloWorld`、`Coremark`）；无目录名时再取 Markdown `#`。
 
 ## 5. 示例怎么分类？
 
@@ -129,19 +129,30 @@ last_update: 2025-03-19
 
 | `category` 值 | 分类名 | 含义 |
 | --- | --- | --- |
-| `basics` | 基础示例 | Hello World、环境跑通等入门程序 |
-| `peripheral` | 外设控制 | GPIO、LED、ePaper 等硬件外设 |
-| `communication` | 通信接口 | UART、I2C、SPI 等通信接口 |
-| `network` | 网络通信 | 网络配置、协议和网络服务 |
-| `system` | 系统编程 | 系统调用、进程和底层系统功能 |
+| `getting-started` | 入门示例 | Hello World、环境配置和首次运行等入门内容 |
+| `peripheral` | 外设控制 | GPIO、UART、I2C、SPI、传感器等板级外设 |
+| `network` | 网络通信 | 网络配置、网络协议和网络服务 |
+| `system` | 系统编程 | 系统调用、进程、内核接口和多核协作 |
+| `storage` | 存储 | 文件系统、块设备、Flash 和数据库等存储功能 |
+| `power-management` | 低功耗与电源管理 | 睡眠、唤醒、功耗测量和电源控制 |
 | `multimedia` | 多媒体应用 | 音频、视频和媒体处理 |
-| `computer-vision` | 计算机视觉 | OpenCV、检测和图像处理 |
-| `ai` | 人工智能 | 模型推理和人工智能示例 |
-| `crypto` | 加密安全 | 加密算法和安全功能 |
+| `computer-vision` | 计算机视觉 | OpenCV、传统视觉算法和图像处理 |
+| `ai` | 人工智能 | 机器学习模型训练、部署和推理 |
+| `security` | 安全 | 密码算法、安全启动和可信执行等安全功能 |
 | `compression` | 数据压缩 | 压缩算法和工具 |
 | `gui` | 图形界面 | LVGL 等图形界面示例 |
-| `benchmark` | 性能评测 | Coremark、Dhrystone 等基准与跑分 |
-| `application` | 应用与综合 | 游戏、综合案例和其他完整应用 |
+| `benchmark` | 性能测试 | Coremark、Dhrystone 等基准与跑分 |
+| `application` | 综合应用 | 游戏、机器人等组合多个功能的完整应用 |
+| `other` | 其他 | 确实无法归入上述分类的示例 |
+
+每个示例只选择一个分类，并以文档的主要教学目标为准：
+
+- UART、I2C、SPI 等板级接口通常归入 `peripheral`；网络配置、协议和服务归入 `network`；系统调用、内核接口和多核协作归入 `system`。
+- 音视频编解码与播放归入 `multimedia`；传统图像处理归入 `computer-vision`；机器学习模型训练、部署和推理归入 `ai`。
+- CoreMark、Dhrystone 等性能测量归入 `benchmark`，不能因为步骤简单而归入 `getting-started`。
+- 组合多个功能形成完整使用场景的示例归入 `application`；只有确实无法归类时才显式使用 `other`，并在拉取请求描述中简要说明原因。
+
+`other` 不是未知值的自动兜底。前端构建会拒绝缺失或不受支持的分类值。迁移期间仅兼容旧值 `basics`、`communication`、`crypto` 和 `others`，分别按 `getting-started`、`peripheral`、`security` 和 `benchmark` 显示。
 
 ## 6. 与支持矩阵的关系
 
@@ -275,10 +286,10 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 │                                                            │
 │  示例列表：                                                 │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │ HelloWorld          基础示例    2025-03-19          │   │
-│  │ Coremark            基础示例    2025-03-19          │   │
-│  │ Pico-8SEG-LED       外设示例    2025-03-19          │   │
-│  │ Pico-ePaper-2.13    外设示例    2025-03-19          │   │
+│  │ HelloWorld          入门示例    2025-03-19          │   │
+│  │ Coremark            性能测试    2025-03-19          │   │
+│  │ Pico-8SEG-LED       外设控制    2025-03-19          │   │
+│  │ Pico-ePaper-2.13    外设控制    2025-03-19          │   │
 │  └─────────────────────────────────────────────────────┘   │
 └────────────────────────────────────────────────────────────┘
 ```
@@ -291,7 +302,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 │  （meta：分类 · 系统 · 日期）                               │
 │                                                            │
 │  ┌─ Markdown 正文 ──────────────────────────────────────┐ │
-│  │ # RuyiSDK 基础示例   ← 正文内标题可与列表标题不同      │ │
+│  │ # RuyiSDK 入门示例   ← 正文内标题可与列表标题不同      │ │
 │  │ ## Hello World (GCC)                                  │ │
 │  │ 创建并激活 ruyi 虚拟环境...                             │ │
 │  │ ```                                                   │ │
