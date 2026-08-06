@@ -129,7 +129,7 @@ last_update: 2025-03-19
 
 | `category` 值 | 分类名 | 含义 |
 | --- | --- | --- |
-| `getting-started` | 入门示例 | Hello World、环境配置和首次运行等入门内容 |
+| `getting-started` | 入门 | Hello World、环境配置和首次运行等入门内容 |
 | `peripheral` | 外设控制 | GPIO、UART、I2C、SPI、传感器等板级外设 |
 | `network` | 网络通信 | 网络配置、网络协议和网络服务 |
 | `system` | 系统编程 | 系统调用、进程、内核接口和多核协作 |
@@ -286,7 +286,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 │                                                            │
 │  示例列表：                                                 │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │ HelloWorld          入门示例    2025-03-19          │   │
+│  │ HelloWorld          入门        2025-03-19          │   │
 │  │ Coremark            性能测试    2025-03-19          │   │
 │  │ Pico-8SEG-LED       外设控制    2025-03-19          │   │
 │  │ Pico-ePaper-2.13    外设控制    2025-03-19          │   │

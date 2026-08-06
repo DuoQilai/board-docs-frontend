@@ -20,7 +20,7 @@ export const EXAMPLE_CATEGORIES = [
 export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number];
 
 export const CATEGORY_LABEL_ZH: Record<ExampleCategory, string> = {
-  "getting-started": "入门示例",
+  "getting-started": "入门",
   peripheral: "外设控制",
   network: "网络通信",
   system: "系统编程",
