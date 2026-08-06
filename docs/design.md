@@ -107,12 +107,12 @@ silicon_vendor: Sophgo      # 芯片厂商（Silicon Vendor），侧栏第一层
 sys: buildroot
 sys_ver: v1.1.4
 sys_var: v1
-status: basics          # basics | peripheral | benchmark | application
+category: basics
 last_update: 2025-03-19
 ---
 ```
 
-`status` 字段用作分类：`basics` = 基础示例，`peripheral` = 外设示例，`benchmark` = 性能评测（跑分、基准测试等），`application` = 应用与综合（系统、大模型、复杂案例等）。旧稿中的 `others` 在解析时视为 `benchmark`（兼容）。
+`category` 字段表示示例分类，不表示支持程度或验证状态。迁移期间前端会优先读取 `category`，并兼容旧文档中的 `status`；新增和修改文档应使用 `category`。
 
 ### 示例文件名约定
 
@@ -125,14 +125,23 @@ last_update: 2025-03-19
 
 ## 5. 示例怎么分类？
 
-基于 frontmatter 中的 `status` 字段：
+基于 frontmatter 中的 `category` 字段：
 
-| status 值 | 分类名 | 含义 |
+| `category` 值 | 分类名 | 含义 |
 | --- | --- | --- |
 | `basics` | 基础示例 | Hello World、环境跑通等入门程序 |
-| `peripheral` | 外设示例 | GPIO、LED、ePaper 等硬件外设 |
+| `peripheral` | 外设控制 | GPIO、LED、ePaper 等硬件外设 |
+| `communication` | 通信接口 | UART、I2C、SPI 等通信接口 |
+| `network` | 网络通信 | 网络配置、协议和网络服务 |
+| `system` | 系统编程 | 系统调用、进程和底层系统功能 |
+| `multimedia` | 多媒体应用 | 音频、视频和媒体处理 |
+| `computer-vision` | 计算机视觉 | OpenCV、检测和图像处理 |
+| `ai` | 人工智能 | 模型推理和人工智能示例 |
+| `crypto` | 加密安全 | 加密算法和安全功能 |
+| `compression` | 数据压缩 | 压缩算法和工具 |
+| `gui` | 图形界面 | LVGL 等图形界面示例 |
 | `benchmark` | 性能评测 | Coremark、Dhrystone 等基准与跑分 |
-| `application` | 应用与综合 | 系统构建、大模型、复杂应用等（也作未知 frontmatter 的兜底） |
+| `application` | 应用与综合 | 游戏、综合案例和其他完整应用 |
 
 ## 6. 与支持矩阵的关系
 

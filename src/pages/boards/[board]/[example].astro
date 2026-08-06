@@ -11,7 +11,7 @@ import {
   socSlugFromCpu,
 } from "../../../lib/data";
 import { renderMarkdownToHtml } from "../../../lib/renderMarkdown";
-import { STATUS_LABEL_ZH } from "../../../lib/status-labels";
+import { CATEGORY_LABEL_ZH } from "../../../lib/category-labels";
 
 export const getStaticPaths: GetStaticPaths = () => {
   const paths: { params: { board: string; example: string } }[] = [];
@@ -56,7 +56,7 @@ const sourceDocUrl = `/${rawDocPath}`;
         <h1 class="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">{ex.title}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
           <span class="bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 text-xs">
-            {STATUS_LABEL_ZH[ex.status]}
+            {CATEGORY_LABEL_ZH[ex.category]}
           </span>
           {ex.sys ? <span class="text-muted-foreground">系统：{ex.sys}</span> : null}
           {ex.lastUpdate ? <span class="text-muted-foreground">更新：{ex.lastUpdate}</span> : null}
