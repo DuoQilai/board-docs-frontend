@@ -160,12 +160,20 @@ function buildExampleMeta(globKey: string, raw: string, boardSlug: string, examp
   const sys = typeof data["sys"] === "string" ? data["sys"] : undefined;
   const lastRaw = data["last_update"] ?? data["lastUpdate"];
   const lastUpdate = typeof lastRaw === "string" ? lastRaw : undefined;
+  let category: ExampleCategory;
+
+  try {
+    category = normalizeExampleCategory(data["category"] ?? data["status"]);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Invalid category in ${globKey}: ${detail}`);
+  }
 
   return {
     boardSlug,
     slug: exampleSlug,
     title: String(title),
-    category: normalizeExampleCategory(data["category"] ?? data["status"]),
+    category,
     sys,
     lastUpdate,
     mdGlobKey: globKey,

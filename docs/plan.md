@@ -35,19 +35,21 @@ type BoardMeta = {
 
 ```typescript
 type ExampleCategory =
-  | "basics"
+  | "getting-started"
   | "peripheral"
-  | "communication"
   | "network"
   | "system"
+  | "storage"
+  | "power-management"
   | "multimedia"
   | "computer-vision"
   | "ai"
-  | "crypto"
+  | "security"
   | "compression"
   | "gui"
   | "benchmark"
-  | "application";
+  | "application"
+  | "other";
 
 type ExampleMeta = {
   boardSlug: string;     // 所属板子 slug
@@ -179,7 +181,7 @@ ssh -L 3000:localhost:3000 fengde@100.90.186.53
 ### 已知问题（必修）
 
 0. **文档页回不了主页**：进入 `/boards/...` 或示例 Markdown 后缺少明确的回到 `/` 的入口。修复：侧栏顶部增加 **Logo + RuyiSDK Examples** 品牌区，整块可点击回到首页；并将页面内的返回链接保持可用。
-1. **示例标题撞名**：板子详情页示例列表全显示「RuyiSDK 基础示例」，无法区分 HelloWorld vs Coremark。修复：`data.ts` 中 `title` 优先用**目录名**（`ex.slug`），不再从 Markdown `#` 提取
+1. **示例标题撞名**：多个示例正文使用「RuyiSDK 入门示例」等通用分类标题，无法仅靠 H1 区分不同示例。修复：`data.ts` 中 `title` 优先用**目录名**（`ex.slug`），不再从 Markdown `#` 提取
 2. **板子详情 README 标题重复**：header 已显示 `board.product`，README 正文第一行又是同名 `#` 标题。修复：渲染 README body 时若第一个 `#` 与 product 相同则跳过
 
 ### 视觉打磨（必做）
