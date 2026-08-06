@@ -11,7 +11,7 @@ import {
   stripDuplicateHeading,
 } from "../../lib/data";
 import { renderMarkdownToHtml } from "../../lib/renderMarkdown";
-import { STATUS_LABEL_ZH } from "../../lib/status-labels";
+import { CATEGORY_LABEL_ZH } from "../../lib/category-labels";
 
 export const getStaticPaths: GetStaticPaths = () =>
   getAllBoards().map((b) => ({ params: { board: b.slug } }));
@@ -124,7 +124,7 @@ const socSlug = socSlugFromCpu(board.cpu);
                   </td>
                   <td class="px-4 py-3">
                     <span class="bg-secondary text-secondary-foreground inline-block rounded-md px-2 py-0.5 text-xs">
-                      {STATUS_LABEL_ZH[ex.status]}
+                      {CATEGORY_LABEL_ZH[ex.category]}
                     </span>
                   </td>
                   <td class="text-muted-foreground hidden px-4 py-3 sm:table-cell">

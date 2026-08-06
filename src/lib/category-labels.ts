@@ -1,5 +1,5 @@
-/** Example category slugs (frontmatter `status` field). */
-export const EXAMPLE_STATUSES = [
+/** Example category slugs (frontmatter `category` field). */
+export const EXAMPLE_CATEGORIES = [
   "basics",
   "peripheral",
   "communication",
@@ -15,9 +15,9 @@ export const EXAMPLE_STATUSES = [
   "application",
 ] as const;
 
-export type ExampleStatus = (typeof EXAMPLE_STATUSES)[number];
+export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number];
 
-export const STATUS_LABEL_ZH: Record<ExampleStatus, string> = {
+export const CATEGORY_LABEL_ZH: Record<ExampleCategory, string> = {
   basics: "基础示例",
   peripheral: "外设控制",
   communication: "通信接口",
@@ -33,18 +33,18 @@ export const STATUS_LABEL_ZH: Record<ExampleStatus, string> = {
   application: "应用与综合",
 };
 
-const STATUS_SET = new Set<string>(EXAMPLE_STATUSES);
+const CATEGORY_SET = new Set<string>(EXAMPLE_CATEGORIES);
 
-/** Normalize frontmatter `status` to a known category slug. */
-export function normalizeExampleStatus(raw: unknown): ExampleStatus {
+/** Normalize a frontmatter category slug. */
+export function normalizeExampleCategory(raw: unknown): ExampleCategory {
   const key = String(raw ?? "")
     .trim()
     .toLowerCase()
     .replace(/_/g, "-");
 
-  if (STATUS_SET.has(key)) return key as ExampleStatus;
+  if (CATEGORY_SET.has(key)) return key as ExampleCategory;
 
-  const legacy: Record<string, ExampleStatus> = {
+  const legacy: Record<string, ExampleCategory> = {
     others: "benchmark",
     good: "basics",
     wip: "system",

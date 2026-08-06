@@ -1,13 +1,13 @@
 import { parse as parseYaml } from "yaml";
-import { normalizeExampleStatus, type ExampleStatus } from "./status-labels";
+import { normalizeExampleCategory, type ExampleCategory } from "./category-labels";
 
-export type { ExampleStatus };
+export type { ExampleCategory };
 
 export type ExampleMeta = {
   boardSlug: string;
   slug: string;
   title: string;
-  status: ExampleStatus;
+  category: ExampleCategory;
   sys?: string;
   lastUpdate?: string;
   /** Vite glob key */
@@ -165,7 +165,7 @@ function buildExampleMeta(globKey: string, raw: string, boardSlug: string, examp
     boardSlug,
     slug: exampleSlug,
     title: String(title),
-    status: normalizeExampleStatus(data["status"]),
+    category: normalizeExampleCategory(data["category"] ?? data["status"]),
     sys,
     lastUpdate,
     mdGlobKey: globKey,
