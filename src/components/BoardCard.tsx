@@ -5,9 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { exampleCountLabel, localePath, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export type BoardCardProps = {
+  lang?: Lang;
   product: string;
   slug: string;
   cpu: string;
@@ -19,6 +21,7 @@ export type BoardCardProps = {
 };
 
 export function BoardCard({
+  lang = "zh",
   product,
   slug,
   cpu,
@@ -27,7 +30,7 @@ export function BoardCard({
   exampleCount,
   className,
 }: BoardCardProps) {
-  const href = `/boards/${encodeURIComponent(slug)}/`;
+  const href = localePath(lang, `/boards/${encodeURIComponent(slug)}/`);
 
   return (
     <a
@@ -42,7 +45,7 @@ export function BoardCard({
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-lg font-semibold leading-snug">{product}</CardTitle>
             <Badge variant="secondary" className="shrink-0 text-xs">
-              {exampleCount} 个示例
+              {exampleCountLabel(lang, exampleCount)}
             </Badge>
           </div>
         </CardHeader>

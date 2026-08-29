@@ -2,18 +2,27 @@
 import "../styles/global.css";
 import { SiteSidebar } from "../components/SiteSidebar";
 import { getAllBoards } from "../lib/data";
+import { altLocale, HTML_LANG, t, type Lang } from "../lib/i18n";
 
 interface Props {
   title?: string;
   description?: string;
+  lang?: Lang;
 }
 
-const { title = "RuyiSDK Examples", description = "RISC-V 开发板示例教程" } = Astro.props;
+const { title = "RuyiSDK Examples", lang = "zh" } = Astro.props;
+const description = Astro.props.description ?? t(lang, "siteDescription");
 const boards = getAllBoards();
+const currentPath = Astro.url.pathname;
+const alternate = altLocale(currentPath);
+const zhPath = lang === "zh" ? currentPath : alternate.href;
+const enPath = lang === "en" ? currentPath : alternate.href;
+const zhHref = new URL(zhPath, Astro.site).href;
+const enHref = new URL(enPath, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={HTML_LANG[lang]}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -22,11 +31,14 @@ const boards = getAllBoards();
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="x-default" href={zhHref} />
     <title>{title}</title>
   </head>
   <body>
     <div class="mx-auto flex max-w-7xl">
-      <SiteSidebar client:load boards={boards} />
+      <SiteSidebar client:load boards={boards} lang={lang} currentPath={currentPath} />
       <main class="min-w-0 flex-1 px-4 sm:px-6">
         <slot />
       </main>

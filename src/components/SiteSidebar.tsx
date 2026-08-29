@@ -4,13 +4,16 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { BoardMeta, SiliconVendorGroup } from "@/lib/data";
 import { boardMatchesQuery, groupBoardsBySiliconVendorChip, slugifyUrlSegment } from "@/lib/data";
+import { altLocale, localePath, t, type Lang } from "@/lib/i18n";
 
 export type SiteSidebarProps = {
   boards: BoardMeta[];
   className?: string;
+  lang?: Lang;
+  currentPath?: string;
 };
 
-export function SiteSidebar({ boards, className }: SiteSidebarProps) {
+export function SiteSidebar({ boards, className, lang = "zh", currentPath = "/" }: SiteSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [filter, setFilter] = useState("");
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(() =>
@@ -54,6 +57,8 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
     });
   }
 
+  const alt = altLocale(currentPath);
+
   return (
     <aside
       className={cn(
@@ -71,13 +76,13 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
         >
           <div className={cn("flex w-full items-center gap-2", collapsed && "flex-col")}>
             <a
-              href="/"
+              href={localePath(lang, "/")}
               className={cn(
                 "hover:bg-muted/60 flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 transition-colors",
                 collapsed && "w-full justify-center px-1",
               )}
-              aria-label="回到首页"
-              title="回到首页"
+              aria-label={t(lang, "backToHome")}
+              title={t(lang, "backToHome")}
             >
               <img
                 src="/ruyi-logo-256.png"
@@ -95,21 +100,30 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
                 collapsed && "h-9 w-9",
               )}
               aria-expanded={!collapsed}
-              aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
-              title={collapsed ? "展开侧栏" : "收起侧栏"}
+              aria-label={collapsed ? t(lang, "expandSidebar") : t(lang, "collapseSidebar")}
+              title={collapsed ? t(lang, "expandSidebar") : t(lang, "collapseSidebar")}
             >
               {collapsed ? "›" : "‹"}
             </button>
           </div>
 
           {!collapsed && (
+            <a
+              href={alt.href}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/60 self-end rounded-md px-2 py-1 text-xs transition-colors"
+            >
+              {alt.label}
+            </a>
+          )}
+
+          {!collapsed && (
             <Input
               type="search"
-              placeholder="搜索开发板、厂商、SoC、核心等…"
+              placeholder={t(lang, "searchPlaceholder")}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="h-8 text-sm"
-              aria-label="搜索"
+              aria-label={t(lang, "search")}
             />
           )}
         </div>
@@ -117,13 +131,13 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
         {!collapsed && (
           <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
             {tree.length === 0 && (
-              <p className="text-muted-foreground px-3 py-4 text-center text-xs">无匹配</p>
+              <p className="text-muted-foreground px-3 py-4 text-center text-xs">{t(lang, "noMatches")}</p>
             )}
 
             {tree.map((vg) => {
               const vendorOpen = expandedVendors.has(vg.siliconVendor);
               const vendorSlug = slugifyUrlSegment(vg.siliconVendor);
-              const vendorHref = `/vendors/${encodeURIComponent(vendorSlug)}/`;
+              const vendorHref = localePath(lang, `/vendors/${encodeURIComponent(vendorSlug)}/`);
               return (
                 <div key={vg.siliconVendor} className="mb-1">
                   <div className="hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-2 py-1.5">
@@ -137,7 +151,7 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
                       type="button"
                       onClick={() => toggleVendor(vg.siliconVendor)}
                       className="text-muted-foreground hover:text-foreground shrink-0 rounded p-0.5"
-                      aria-label={vendorOpen ? "折叠" : "展开"}
+                      aria-label={vendorOpen ? t(lang, "collapse") : t(lang, "expand")}
                     >
                       <ChevronIcon open={vendorOpen} />
                     </button>
@@ -164,7 +178,7 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
                                 type="button"
                                 onClick={() => toggleChip(chipKey)}
                                 className="text-muted-foreground hover:text-foreground shrink-0 rounded p-0.5"
-                                aria-label={chipOpen ? "折叠" : "展开"}
+                                aria-label={chipOpen ? t(lang, "collapse") : t(lang, "expand")}
                               >
                                 <ChevronIcon open={chipOpen} />
                               </button>
@@ -175,7 +189,7 @@ export function SiteSidebar({ boards, className }: SiteSidebarProps) {
                                 {cg.boards.map((b) => (
                                   <a
                                     key={b.slug}
-                                    href={`/boards/${encodeURIComponent(b.slug)}/`}
+                                    href={localePath(lang, `/boards/${encodeURIComponent(b.slug)}/`)}
                                     className="text-foreground hover:bg-muted/60 flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors"
                                   >
                                     <span className="truncate">{b.product}</span>
@@ -214,4 +228,3 @@ function ChevronIcon({ open }: { open: boolean }) {
     </svg>
   );
 }
-
