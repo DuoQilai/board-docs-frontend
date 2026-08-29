@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths } from "astro";
+
+import VendorPageContent from "../../../components/pages/VendorPageContent.astro";
+import Layout from "../../../layouts/Layout.astro";
+import {
+  getBoardsForSiliconVendorUrlSlug,
+  getUniqueSiliconVendorUrlSlugs,
+} from "../../../lib/data";
+import { t } from "../../../lib/i18n";
+
+export const getStaticPaths: GetStaticPaths = () =>
+  getUniqueSiliconVendorUrlSlugs().map(({ slug }) => ({ params: { vendor: slug } }));
+
+const vendorParam = Astro.params.vendor!;
+const boards = getBoardsForSiliconVendorUrlSlug(vendorParam);
+
+if (boards.length === 0) {
+  return Astro.redirect("/en/vendors/");
+}
+
+const label = boards[0]!.socVendor ?? "Unknown";
+---
+
+<Layout lang="en" title={`${label} — ${t("en", "vendorsTitle")} — RuyiSDK Examples`}>
+  <VendorPageContent lang="en" vendorParam={vendorParam} />
+</Layout>

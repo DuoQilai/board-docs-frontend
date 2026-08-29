@@ -1,0 +1,20 @@
+---
+import type { GetStaticPaths } from "astro";
+
+import { getBoardsForSocUrlSlug, getUniqueSocUrlSlugs, slugifyUrlSegment } from "../../../lib/data";
+
+export const getStaticPaths: GetStaticPaths = () =>
+  getUniqueSocUrlSlugs().map(({ slug }) => ({ params: { soc: slug } }));
+
+const socParam = Astro.params.soc!;
+const boards = getBoardsForSocUrlSlug(socParam);
+
+if (boards.length === 0) {
+  return Astro.redirect("/en/vendors/");
+}
+
+const sv = boards[0]!.socVendor ?? "Unknown";
+const svSlug = slugifyUrlSegment(sv);
+
+return Astro.redirect(`/en/vendors/${encodeURIComponent(svSlug)}/`);
+---
