@@ -1,0 +1,83 @@
+---
+import { categoryLabel } from "../../lib/category-labels";
+import type { BoardMeta, ExampleMeta } from "../../lib/data";
+import { slugifyUrlSegment, socSlugFromCpu } from "../../lib/data";
+import { t, type Lang } from "../../lib/i18n";
+
+interface Props {
+  lang: Lang;
+  board: BoardMeta;
+  ex: ExampleMeta;
+  contentHtml: string;
+}
+
+const { lang, board, ex, contentHtml } = Astro.props;
+
+const sv = board.socVendor ?? "Unknown";
+const svSlug = slugifyUrlSegment(sv);
+const socSlug = socSlugFromCpu(board.cpu);
+const rawDocPath = ex.mdGlobKey
+  .replace(/\\/g, "/")
+  .replace(/^\.\.\/\.\.\//, "")
+  .replace(/^board-docs\/boards\//, "board-docs/");
+const sourceDocUrl = `/${rawDocPath}`;
+---
+
+<div class="py-8">
+
+  <!-- Header + meta -->
+  <header class="mb-6 flex items-start justify-between gap-4">
+    <div>
+      <p class="text-muted-foreground mb-1 text-sm">{board.product}</p>
+      <h1 class="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">{ex.title}</h1>
+      <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <span class="bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 text-xs">
+          {categoryLabel(lang, ex.category)}
+        </span>
+        {ex.sys ? <span class="text-muted-foreground">{t(lang, "metaSystem")}{ex.sys}</span> : null}
+        {ex.lastUpdate ? <span class="text-muted-foreground">{t(lang, "metaUpdated")}{ex.lastUpdate}</span> : null}
+      </div>
+    </div>
+    <button
+      id="use-in-vscode-button"
+      type="button"
+      class="bg-primary text-primary-foreground hover:bg-primary/90 hidden shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors"
+      data-model={board.product}
+      data-profile={ex.title}
+      data-source-doc-url={sourceDocUrl}
+    >
+      {t(lang, "useInVSCode")}
+    </button>
+  </header>
+
+  <!-- Divider -->
+  <hr class="border-border mb-8" />
+
+  <!-- Markdown body -->
+  <article class="prose prose-slate dark:prose-invert max-w-none prose-img:rounded-lg prose-img:shadow-sm prose-pre:rounded-lg" set:html={contentHtml} />
+</div>
+
+<script>
+  const button = document.getElementById("use-in-vscode-button");
+  if (button instanceof HTMLButtonElement) {
+    const isVSCodeWebView = navigator.userAgent.includes("Code/");
+    const isEclipseWebView = (typeof (window as any).__RUYI_ECLIPSE_WEBVIEW__ !== "undefined" && (window as any).__RUYI_ECLIPSE_WEBVIEW__ === true) ||
+      navigator.userAgent.includes("Eclipse");
+    const isIdeWebView = isVSCodeWebView || isEclipseWebView;
+    if (isIdeWebView) {
+      button.classList.remove("hidden");
+      button.addEventListener("click", () => {
+        const model = button.dataset.model ?? "";
+        const profile = button.dataset.profile ?? "";
+        const sourceDocUrl = button.dataset.sourceDocUrl ?? "";
+        const url = sourceDocUrl ? new URL(sourceDocUrl, window.location.origin).href : window.location.href;
+        window.parent.postMessage({
+          type: "copilot",
+          url,
+          model,
+          profile,
+        }, "*");
+      });
+    }
+  }
+</script>

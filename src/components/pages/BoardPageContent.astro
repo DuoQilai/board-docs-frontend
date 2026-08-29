@@ -1,0 +1,139 @@
+---
+import { categoryLabel } from "../../lib/category-labels";
+import type { BoardMeta } from "../../lib/data";
+import {
+  getBoardReadmeBody,
+  slugifyUrlSegment,
+  socSlugFromCpu,
+  stripDuplicateHeading,
+} from "../../lib/data";
+import { localePath, t, type Lang } from "../../lib/i18n";
+import { renderMarkdownToHtml } from "../../lib/renderMarkdown";
+
+interface Props {
+  lang: Lang;
+  board: BoardMeta;
+}
+
+const { lang, board } = Astro.props;
+const fallbackLang: Lang = lang === "zh" ? "en" : "zh";
+
+const rawIntroMd = getBoardReadmeBody(board.slug, lang) ?? "";
+const introMdPreferred = rawIntroMd ? stripDuplicateHeading(rawIntroMd, board.product) : "";
+
+// Some boards have a README that only contains a duplicated H1 (no body),
+// which becomes empty after stripping. In that case, fall back to the other language.
+const rawIntroMdFallback = getBoardReadmeBody(board.slug, fallbackLang) ?? "";
+const introMdFallback = rawIntroMdFallback
+  ? stripDuplicateHeading(rawIntroMdFallback, board.product)
+  : "";
+
+const introMd = introMdPreferred || introMdFallback;
+const introHtml = introMd ? await renderMarkdownToHtml(introMd) : "";
+
+const sv = board.socVendor ?? "Unknown";
+const svSlug = slugifyUrlSegment(sv);
+const socSlug = socSlugFromCpu(board.cpu);
+---
+
+<div class="py-8">
+  <!-- Board header + 属性（与 frontmatter 对齐） -->
+  <header class="mb-8">
+    <h1 class="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">{board.product}</h1>
+    <dl class="text-muted-foreground mt-4 grid max-w-xl gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">product</dt>
+        <dd class="text-foreground">{board.product}</dd>
+      </div>
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">SoC</dt>
+        <dd class="text-foreground">{board.cpu || "—"}</dd>
+      </div>
+      {
+        board.cpuCore && (
+          <div class="flex flex-col gap-0.5 sm:col-span-2">
+            <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">cpu_core</dt>
+            <dd class="text-foreground">{board.cpuCore}</dd>
+          </div>
+        )
+      }
+      {
+        board.ram && (
+          <div class="flex flex-col gap-0.5">
+            <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">ram</dt>
+            <dd class="text-foreground">{board.ram}</dd>
+          </div>
+        )
+      }
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">Board_Vendor</dt>
+        <dd class="text-foreground">{board.vendor || "—"}</dd>
+      </div>
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">Silicon_Vendor</dt>
+        <dd class="text-foreground">{board.socVendor ?? "—"}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <!-- README intro -->
+  {
+    introHtml && (
+      <article
+        class="prose prose-slate dark:prose-invert mb-6 max-w-none prose-sm leading-6 prose-headings:mb-2 prose-headings:mt-4 prose-h1:mt-0 prose-h1:text-lg prose-h1:leading-6 prose-h1:font-semibold prose-h2:text-base prose-h2:leading-6 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-4"
+        set:html={introHtml}
+      />
+    )
+  }
+
+  <!-- Divider -->
+  <hr class="border-border mb-4" />
+
+  <!-- Example list -->
+  <section>
+    <h2 class="text-foreground mb-4 text-lg font-semibold">{t(lang, "exampleList")}</h2>
+    {board.examples.length === 0 ? (
+      <div class="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
+        {t(lang, "noExamples")}
+      </div>
+    ) : (
+      <div class="divide-border overflow-hidden rounded-xl border">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-muted/50 text-muted-foreground text-left text-xs">
+              <th class="px-4 py-2.5 font-medium">{t(lang, "thExample")}</th>
+              <th class="px-4 py-2.5 font-medium">{t(lang, "thCategory")}</th>
+              <th class="hidden px-4 py-2.5 font-medium sm:table-cell">{t(lang, "thSystem")}</th>
+              <th class="hidden px-4 py-2.5 text-right font-medium sm:table-cell">{t(lang, "thLastUpdate")}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-border divide-y">
+            {board.examples.map((ex) => (
+              <tr class="hover:bg-muted/40 transition-colors">
+                <td class="px-4 py-3">
+                  <a
+                    href={localePath(lang, `/boards/${encodeURIComponent(board.slug)}/${encodeURIComponent(ex.slug)}/`)}
+                    class="text-foreground font-medium hover:underline underline-offset-4"
+                  >
+                    {ex.title}
+                  </a>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="bg-secondary text-secondary-foreground inline-block rounded-md px-2 py-0.5 text-xs">
+                    {categoryLabel(lang, ex.category)}
+                  </span>
+                </td>
+                <td class="text-muted-foreground hidden px-4 py-3 sm:table-cell">
+                  {ex.sys ?? "—"}
+                </td>
+                <td class="text-muted-foreground hidden px-4 py-3 text-right sm:table-cell">
+                  {ex.lastUpdate ?? "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+</div>

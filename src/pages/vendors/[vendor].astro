@@ -1,13 +1,13 @@
 ---
 import type { GetStaticPaths } from "astro";
 
+import VendorPageContent from "../../components/pages/VendorPageContent.astro";
 import Layout from "../../layouts/Layout.astro";
 import {
   getBoardsForSiliconVendorUrlSlug,
   getUniqueSiliconVendorUrlSlugs,
-  groupBoardsBySiliconVendorChip,
-  socSlugFromCpu,
 } from "../../lib/data";
+import { t } from "../../lib/i18n";
 
 export const getStaticPaths: GetStaticPaths = () =>
   getUniqueSiliconVendorUrlSlugs().map(({ slug }) => ({ params: { vendor: slug } }));
@@ -20,40 +20,8 @@ if (boards.length === 0) {
 }
 
 const label = boards[0]!.socVendor ?? "Unknown";
-const tree = groupBoardsBySiliconVendorChip(boards);
-const group = tree[0]!;
 ---
 
-<Layout title={`${label} — 芯片厂商 — RuyiSDK Examples`}>
-  <div class="py-8">
-    <header class="mb-10">
-      <h1 class="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">{label}</h1>
-      <p class="text-muted-foreground mt-2 text-sm">该芯片厂商下的 SoC 与开发板汇总如下 </p>
-    </header>
-
-    <div class="space-y-10">
-      {
-        group.chips.map((cg) => (
-          <section>
-            <h2 id={`soc-${socSlugFromCpu(cg.cpu)}`} class="text-foreground mb-3 text-lg font-semibold">
-              {cg.cpu}
-            </h2>
-            <ul class="divide-border divide-y rounded-xl border">
-              {cg.boards.map((b) => (
-                <li>
-                  <a
-                    href={`/boards/${encodeURIComponent(b.slug)}/`}
-                    class="hover:bg-muted/40 flex flex-wrap items-center justify-between gap-2 px-4 py-3 transition-colors"
-                  >
-                    <span class="text-foreground font-medium">{b.product}</span>
-                    <span class="text-muted-foreground text-sm">{b.vendor ? `板厂：${b.vendor}` : ""}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))
-      }
-    </div>
-  </div>
+<Layout lang="zh" title={`${label} — ${t("zh", "vendorsTitle")} — RuyiSDK Examples`}>
+  <VendorPageContent lang="zh" vendorParam={vendorParam} />
 </Layout>

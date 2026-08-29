@@ -1,0 +1,30 @@
+---
+import { getUniqueSiliconVendorUrlSlugs } from "../../lib/data";
+import { localePath, t, type Lang } from "../../lib/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const vendors = getUniqueSiliconVendorUrlSlugs();
+---
+
+<div class="py-8">
+  <h1 class="text-foreground mb-2 text-2xl font-semibold tracking-tight">{t(lang, "vendorsTitle")}</h1>
+  <p class="text-muted-foreground mb-8 text-sm">{t(lang, "vendorsSubtitle")}</p>
+  <ul class="divide-border divide-y rounded-xl border">
+    {
+      vendors.map((v) => (
+        <li>
+          <a
+            href={localePath(lang, `/vendors/${encodeURIComponent(v.slug)}/`)}
+            class="hover:bg-muted/40 block px-4 py-3 text-base font-medium transition-colors"
+          >
+            {v.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
