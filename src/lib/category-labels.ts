@@ -61,7 +61,7 @@ export function categoryLabel(lang: "zh" | "en", c: ExampleCategory): string {
 
 const CATEGORY_SET = new Set<string>(EXAMPLE_CATEGORIES);
 
-/** Normalize a frontmatter category slug and reject unsupported values. */
+/** Normalize a frontmatter category slug and fall back for unsupported values. */
 export function normalizeExampleCategory(raw: unknown): ExampleCategory {
   const key = String(raw ?? "")
     .trim()
@@ -78,5 +78,6 @@ export function normalizeExampleCategory(raw: unknown): ExampleCategory {
   };
   if (legacy[key]) return legacy[key];
 
-  throw new Error(`Unsupported example category: ${JSON.stringify(raw)}`);
+  console.warn(`[category] unsupported value ${JSON.stringify(raw)}, falling back to "other"`);
+  return "other";
 }
