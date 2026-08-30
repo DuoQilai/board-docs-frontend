@@ -12,6 +12,8 @@ export type ExampleMeta = {
   lastUpdate?: string;
   /** Vite glob key */
   mdGlobKey: string;
+  mdGlobKeyZh?: string;
+  mdGlobKeyEn?: string;
 };
 
 export type BoardMeta = {
@@ -125,11 +127,18 @@ function parseExamplePath(key: string): { board: string; example: string } | nul
   return { board, example };
 }
 
-function pickExampleMdKey(keys: string[]): string {
-  const ex = keys.filter((k) => !k.endsWith("/README.md"));
-  const preferred = ex.find((k) => /\/example_[^/]+\.md$/i.test(k.replace(/\\/g, "/")));
-  if (preferred) return preferred;
-  return ex.sort()[0] ?? keys[0];
+function pickExampleMdKeys(keys: string[]): { zh?: string; en?: string } {
+  const en = keys.find((k) => k.replace(/\\/g, "/").endsWith("/README.md"));
+  const zhCandidates = keys.filter(
+    (k) => !k.replace(/\\/g, "/").endsWith("/README.md"),
+  );
+  const legacy = zhCandidates.find((k) =>
+    /\/example_[^/]+\.md$/i.test(k.replace(/\\/g, "/")),
+  );
+  const readmeZh = zhCandidates.find((k) =>
+    k.replace(/\\/g, "/").endsWith("/README_zh.md"),
+  );
+  return { zh: legacy ?? readmeZh ?? zhCandidates.sort()[0], en };
 }
 
 function buildBoardMeta(slug: string, readmeRaw: string, examples: ExampleMeta[]): BoardMeta {
@@ -154,7 +163,15 @@ function buildBoardMeta(slug: string, readmeRaw: string, examples: ExampleMeta[]
   };
 }
 
-function buildExampleMeta(globKey: string, raw: string, boardSlug: string, exampleSlug: string): ExampleMeta {
+function buildExampleMeta(
+  mdGlobKeyZh: string | undefined,
+  mdGlobKeyEn: string | undefined,
+  raw: string,
+  boardSlug: string,
+  exampleSlug: string,
+): ExampleMeta {
+  const mdGlobKey = mdGlobKeyZh ?? mdGlobKeyEn;
+  if (!mdGlobKey) throw new Error(`No Markdown document found for ${boardSlug}/${exampleSlug}`);
   const { data } = splitFrontmatter(raw);
   const title = exampleSlug;
   const sys = typeof data["sys"] === "string" ? data["sys"] : undefined;
@@ -166,7 +183,7 @@ function buildExampleMeta(globKey: string, raw: string, boardSlug: string, examp
     category = normalizeExampleCategory(data["category"] ?? data["status"]);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
-    throw new Error(`Invalid category in ${globKey}: ${detail}`);
+    throw new Error(`Invalid category in ${mdGlobKey}: ${detail}`);
   }
 
   return {
@@ -176,7 +193,9 @@ function buildExampleMeta(globKey: string, raw: string, boardSlug: string, examp
     category,
     sys,
     lastUpdate,
-    mdGlobKey: globKey,
+    mdGlobKey,
+    mdGlobKeyZh,
+    mdGlobKeyEn,
   };
 }
 
@@ -298,10 +317,12 @@ export function getAllBoards(): BoardMeta[] {
     const exMap = byBoard.get(slug) ?? new Map();
     const examples: ExampleMeta[] = [];
     for (const [exampleSlug, keys] of exMap) {
-      const pick = pickExampleMdKey(keys);
-      const raw = exampleMdGlob[pick];
+      const { zh, en } = pickExampleMdKeys(keys);
+      const globKey = zh ?? en;
+      if (!globKey) continue;
+      const raw = exampleMdGlob[globKey];
       if (!raw) continue;
-      examples.push(buildExampleMeta(pick, raw, slug, exampleSlug));
+      examples.push(buildExampleMeta(zh, en, raw, slug, exampleSlug));
     }
     boards.push(buildBoardMeta(slug, readmeRaw, examples));
   }
@@ -311,10 +332,12 @@ export function getAllBoards(): BoardMeta[] {
       const exMap = byBoard.get(slug)!;
       const examples: ExampleMeta[] = [];
       for (const [exampleSlug, keys] of exMap) {
-        const pick = pickExampleMdKey(keys);
-        const raw = exampleMdGlob[pick];
+        const { zh, en } = pickExampleMdKeys(keys);
+        const globKey = zh ?? en;
+        if (!globKey) continue;
+        const raw = exampleMdGlob[globKey];
         if (!raw) continue;
-        examples.push(buildExampleMeta(pick, raw, slug, exampleSlug));
+        examples.push(buildExampleMeta(zh, en, raw, slug, exampleSlug));
       }
       const placeholder = `# ${slug}\n`;
       boards.push(buildBoardMeta(slug, placeholder, examples));
@@ -356,13 +379,25 @@ function getRawByGlobKey(key: string): string | undefined {
 }
 
 /** Markdown body (no frontmatter), with media paths fixed for /board-docs */
-export function getExampleMarkdownBody(boardSlug: string, exampleSlug: string): string | undefined {
+export function getExampleMarkdownBody(
+  boardSlug: string,
+  exampleSlug: string,
+  lang: "zh" | "en",
+): { body: string; lang: "zh" | "en"; globKey: string } | undefined {
   const ex = getExampleMeta(boardSlug, exampleSlug);
   if (!ex) return undefined;
-  const raw = getRawByGlobKey(ex.mdGlobKey);
+  const preferredGlobKey = lang === "zh" ? ex.mdGlobKeyZh : ex.mdGlobKeyEn;
+  const fallbackGlobKey = lang === "zh" ? ex.mdGlobKeyEn : ex.mdGlobKeyZh;
+  const globKey = preferredGlobKey ?? fallbackGlobKey;
+  if (!globKey) return undefined;
+  const raw = getRawByGlobKey(globKey);
   if (!raw) return undefined;
   const body = splitFrontmatter(raw).body.trim();
-  return rewriteExampleMediaPaths(body, boardSlug, exampleSlug);
+  return {
+    body: rewriteExampleMediaPaths(body, boardSlug, exampleSlug),
+    lang: preferredGlobKey ? lang : lang === "zh" ? "en" : "zh",
+    globKey,
+  };
 }
 
 const readmeZhGlobLegacy = import.meta.glob("../../board-docs/*/README_zh.md", {
