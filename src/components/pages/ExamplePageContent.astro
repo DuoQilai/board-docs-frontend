@@ -9,14 +9,16 @@ interface Props {
   board: BoardMeta;
   ex: ExampleMeta;
   contentHtml: string;
+  bodyLang: Lang;
+  bodyGlobKey: string;
 }
 
-const { lang, board, ex, contentHtml } = Astro.props;
+const { lang, board, ex, contentHtml, bodyLang, bodyGlobKey } = Astro.props;
 
 const sv = board.socVendor ?? "Unknown";
 const svSlug = slugifyUrlSegment(sv);
 const socSlug = socSlugFromCpu(board.cpu);
-const rawDocPath = ex.mdGlobKey
+const rawDocPath = bodyGlobKey
   .replace(/\\/g, "/")
   .replace(/^\.\.\/\.\.\//, "")
   .replace(/^board-docs\/boards\//, "board-docs/");
@@ -54,6 +56,11 @@ const sourceDocUrl = `/${rawDocPath}`;
   <hr class="border-border mb-8" />
 
   <!-- Markdown body -->
+  {bodyLang !== lang ? (
+    <div class="border-border bg-muted/40 text-muted-foreground mb-6 rounded-md border px-4 py-3 text-sm">
+      {t(lang, "docFallbackNotice")}
+    </div>
+  ) : null}
   <article class="prose prose-slate dark:prose-invert max-w-none prose-img:rounded-lg prose-img:shadow-sm prose-pre:rounded-lg" set:html={contentHtml} />
 </div>
 

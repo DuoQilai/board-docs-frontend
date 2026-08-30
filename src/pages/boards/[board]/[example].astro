@@ -26,15 +26,22 @@ const exampleSlug = Astro.params.example!;
 
 const board = getBoardBySlug(boardSlug);
 const ex = getExampleMeta(boardSlug, exampleSlug);
-const md = ex ? getExampleMarkdownBody(boardSlug, exampleSlug) : undefined;
+const md = ex ? getExampleMarkdownBody(boardSlug, exampleSlug, "zh") : undefined;
 
 if (!board || !ex || !md) {
   return Astro.redirect(board ? `/boards/${encodeURIComponent(board.slug)}/` : "/");
 }
 
-const contentHtml = await renderMarkdownToHtml(md);
+const contentHtml = await renderMarkdownToHtml(md.body);
 ---
 
 <Layout lang="zh" title={`${ex.title} — ${board.product}`}>
-  <ExamplePageContent lang="zh" board={board} ex={ex} contentHtml={contentHtml} />
+  <ExamplePageContent
+    lang="zh"
+    board={board}
+    ex={ex}
+    contentHtml={contentHtml}
+    bodyLang={md.lang}
+    bodyGlobKey={md.globKey}
+  />
 </Layout>
