@@ -1,27 +1,9 @@
 ---
+import VendorListContent from "../../components/pages/VendorListContent.astro";
 import Layout from "../../layouts/Layout.astro";
-import { getUniqueSiliconVendorUrlSlugs } from "../../lib/data";
-
-const vendors = getUniqueSiliconVendorUrlSlugs();
+import { t } from "../../lib/i18n";
 ---
 
-<Layout title="芯片厂商 — RuyiSDK Examples">
-  <div class="py-8">
-    <h1 class="text-foreground mb-2 text-2xl font-semibold tracking-tight">芯片厂商</h1>
-    <p class="text-muted-foreground mb-8 text-sm">按 Silicon Vendor（silicon_vendor）浏览</p>
-    <ul class="divide-border divide-y rounded-xl border">
-      {
-        vendors.map((v) => (
-          <li>
-            <a
-              href={`/vendors/${encodeURIComponent(v.slug)}/`}
-              class="hover:bg-muted/40 block px-4 py-3 text-base font-medium transition-colors"
-            >
-              {v.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </div>
+<Layout lang="zh" title={`${t("zh", "vendorsTitle")} — RuyiSDK Examples`}>
+  <VendorListContent lang="zh" />
 </Layout>

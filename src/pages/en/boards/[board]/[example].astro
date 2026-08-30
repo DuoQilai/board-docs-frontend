@@ -1,15 +1,15 @@
 ---
 import type { GetStaticPaths } from "astro";
 
-import ExamplePageContent from "../../../components/pages/ExamplePageContent.astro";
-import Layout from "../../../layouts/Layout.astro";
+import ExamplePageContent from "../../../../components/pages/ExamplePageContent.astro";
+import Layout from "../../../../layouts/Layout.astro";
 import {
   getAllBoards,
   getBoardBySlug,
   getExampleMarkdownBody,
   getExampleMeta,
-} from "../../../lib/data";
-import { renderMarkdownToHtml } from "../../../lib/renderMarkdown";
+} from "../../../../lib/data";
+import { renderMarkdownToHtml } from "../../../../lib/renderMarkdown";
 
 export const getStaticPaths: GetStaticPaths = () => {
   const paths: { params: { board: string; example: string } }[] = [];
@@ -29,12 +29,12 @@ const ex = getExampleMeta(boardSlug, exampleSlug);
 const md = ex ? getExampleMarkdownBody(boardSlug, exampleSlug) : undefined;
 
 if (!board || !ex || !md) {
-  return Astro.redirect(board ? `/boards/${encodeURIComponent(board.slug)}/` : "/");
+  return Astro.redirect(board ? `/en/boards/${encodeURIComponent(board.slug)}/` : "/en/");
 }
 
 const contentHtml = await renderMarkdownToHtml(md);
 ---
 
-<Layout lang="zh" title={`${ex.title} — ${board.product}`}>
-  <ExamplePageContent lang="zh" board={board} ex={ex} contentHtml={contentHtml} />
+<Layout lang="en" title={`${ex.title} — ${board.product}`}>
+  <ExamplePageContent lang="en" board={board} ex={ex} contentHtml={contentHtml} />
 </Layout>

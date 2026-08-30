@@ -1,0 +1,21 @@
+---
+import type { GetStaticPaths } from "astro";
+
+import BoardPageContent from "../../../components/pages/BoardPageContent.astro";
+import Layout from "../../../layouts/Layout.astro";
+import { getAllBoards, getBoardBySlug } from "../../../lib/data";
+
+export const getStaticPaths: GetStaticPaths = () =>
+  getAllBoards().map((b) => ({ params: { board: b.slug } }));
+
+const boardSlug = Astro.params.board!;
+const board = getBoardBySlug(boardSlug);
+
+if (!board) {
+  return Astro.redirect("/en/");
+}
+---
+
+<Layout lang="en" title={`${board.product} — RuyiSDK Examples`}>
+  <BoardPageContent lang="en" board={board} />
+</Layout>

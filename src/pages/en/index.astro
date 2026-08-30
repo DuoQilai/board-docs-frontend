@@ -1,0 +1,15 @@
+---
+import BoardsHome from "../../components/BoardsHome";
+import Layout from "../../layouts/Layout.astro";
+import { getAllBoards } from "../../lib/data";
+
+const boards = getAllBoards();
+
+if (import.meta.env.DEV) {
+  console.log("[boards]", boards);
+}
+---
+
+<Layout lang="en" title="RuyiSDK Examples">
+  <BoardsHome client:load boards={boards} lang="en" />
+</Layout>

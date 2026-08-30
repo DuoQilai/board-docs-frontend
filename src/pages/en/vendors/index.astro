@@ -1,0 +1,9 @@
+---
+import VendorListContent from "../../../components/pages/VendorListContent.astro";
+import Layout from "../../../layouts/Layout.astro";
+import { t } from "../../../lib/i18n";
+---
+
+<Layout lang="en" title={`${t("en", "vendorsTitle")} — RuyiSDK Examples`}>
+  <VendorListContent lang="en" />
+</Layout>

@@ -37,6 +37,28 @@ export const CATEGORY_LABEL_ZH: Record<ExampleCategory, string> = {
   other: "其他",
 };
 
+export const CATEGORY_LABEL_EN: Record<ExampleCategory, string> = {
+  "getting-started": "Getting Started",
+  peripheral: "Peripherals",
+  network: "Networking",
+  system: "System Programming",
+  storage: "Storage",
+  "power-management": "Power Management",
+  multimedia: "Multimedia",
+  "computer-vision": "Computer Vision",
+  ai: "AI",
+  security: "Security",
+  compression: "Compression",
+  gui: "GUI",
+  benchmark: "Benchmark",
+  application: "Applications",
+  other: "Other",
+};
+
+export function categoryLabel(lang: "zh" | "en", c: ExampleCategory): string {
+  return (lang === "en" ? CATEGORY_LABEL_EN : CATEGORY_LABEL_ZH)[c];
+}
+
 const CATEGORY_SET = new Set<string>(EXAMPLE_CATEGORIES);
 
 /** Normalize a frontmatter category slug and reject unsupported values. */
