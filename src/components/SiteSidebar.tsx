@@ -4,16 +4,15 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { BoardMeta, SiliconVendorGroup } from "@/lib/data";
 import { boardMatchesQuery, groupBoardsBySiliconVendorChip, slugifyUrlSegment } from "@/lib/data";
-import { altLocale, localePath, t, type Lang } from "@/lib/i18n";
+import { localePath, t, type Lang } from "@/lib/i18n";
 
 export type SiteSidebarProps = {
   boards: BoardMeta[];
   className?: string;
   lang?: Lang;
-  currentPath?: string;
 };
 
-export function SiteSidebar({ boards, className, lang = "zh", currentPath = "/" }: SiteSidebarProps) {
+export function SiteSidebar({ boards, className, lang = "zh" }: SiteSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [filter, setFilter] = useState("");
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(() =>
@@ -57,66 +56,17 @@ export function SiteSidebar({ boards, className, lang = "zh", currentPath = "/" 
     });
   }
 
-  const alt = altLocale(currentPath);
-
   return (
     <aside
       className={cn(
-        "border-border bg-background sticky top-0 hidden h-screen shrink-0 overflow-hidden border-r lg:flex",
-        collapsed ? "w-14" : "w-72",
+        "border-border bg-background sticky top-6 hidden h-[calc(100dvh-3rem)] shrink-0 overflow-hidden rounded-lg border lg:flex",
+        collapsed ? "w-6" : "w-72",
         className,
       )}
     >
       <div className={cn("flex h-full w-full flex-col", collapsed && "items-center")}>
-        <div
-          className={cn(
-            "border-border flex w-full flex-col gap-2 border-b p-3",
-            collapsed && "items-center p-2",
-          )}
-        >
-          <div className={cn("flex w-full items-center gap-2", collapsed && "flex-col")}>
-            <a
-              href={localePath(lang, "/")}
-              className={cn(
-                "hover:bg-muted/60 flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 transition-colors",
-                collapsed && "w-full justify-center px-1",
-              )}
-              aria-label={t(lang, "backToHome")}
-              title={t(lang, "backToHome")}
-            >
-              <img
-                src="/ruyi-logo-256.png"
-                alt="RuyiSDK"
-                className={cn("h-6 w-6 shrink-0", collapsed && "h-7 w-7")}
-              />
-              {!collapsed && <span className="text-foreground truncate text-sm font-semibold">RuyiSDK Examples</span>}
-            </a>
-
-            <button
-              type="button"
-              onClick={() => setCollapsed((c) => !c)}
-              className={cn(
-                "text-muted-foreground hover:text-foreground hover:bg-muted/60 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm transition-colors",
-                collapsed && "h-9 w-9",
-              )}
-              aria-expanded={!collapsed}
-              aria-label={collapsed ? t(lang, "expandSidebar") : t(lang, "collapseSidebar")}
-              title={collapsed ? t(lang, "expandSidebar") : t(lang, "collapseSidebar")}
-            >
-              {collapsed ? "›" : "‹"}
-            </button>
-          </div>
-
-          {!collapsed && (
-            <a
-              href={alt.href}
-              className="text-muted-foreground hover:text-foreground hover:bg-muted/60 self-end rounded-md px-2 py-1 text-xs transition-colors"
-            >
-              {alt.label}
-            </a>
-          )}
-
-          {!collapsed && (
+        {!collapsed && (
+          <div className="w-full p-3">
             <Input
               type="search"
               placeholder={t(lang, "searchPlaceholder")}
@@ -125,8 +75,8 @@ export function SiteSidebar({ boards, className, lang = "zh", currentPath = "/" 
               className="h-8 text-sm"
               aria-label={t(lang, "search")}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {!collapsed && (
           <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
@@ -211,6 +161,21 @@ export function SiteSidebar({ boards, className, lang = "zh", currentPath = "/" 
           </nav>
         )}
       </div>
+      <button
+        type="button"
+        aria-expanded={!collapsed}
+        aria-label={collapsed ? t(lang, "expandSidebar") : t(lang, "collapseSidebar")}
+        title={collapsed ? t(lang, "expandSidebar") : t(lang, "collapseSidebar")}
+        onClick={() => setCollapsed((value) => !value)}
+        className="group absolute inset-y-0 right-0 z-10 flex w-3 cursor-pointer items-center justify-center outline-none hover:bg-primary/10 focus-visible:bg-primary/10"
+      >
+        <span aria-hidden="true" className={cn(
+          "text-primary text-sm opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100",
+          collapsed && "opacity-100",
+        )}>
+          {collapsed ? "›" : "‹"}
+        </span>
+      </button>
     </aside>
   );
 }

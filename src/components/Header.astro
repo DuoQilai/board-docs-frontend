@@ -1,0 +1,69 @@
+---
+import { ExternalLink, Github, Languages, Menu } from "lucide-react";
+import { altLocale, localePath, type Lang } from "../lib/i18n";
+
+interface Props {
+  lang: Lang;
+  currentPath: string;
+}
+
+const { lang, currentPath } = Astro.props;
+const alternate = altLocale(currentPath);
+const externalLinks = [
+  { label: lang === "zh" ? "支持矩阵" : "Support Matrix", href: "https://matrix.ruyisdk.org" },
+  { label: "RuyiSDK", href: "https://ruyisdk.org" },
+  { label: lang === "zh" ? "RuyiSDK社区" : "Ruyi Community", href: "https://ruyisdk.cn" },
+];
+---
+
+<header class="relative border-b py-4">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4">
+    <a href={localePath(lang, "/")} class="flex shrink-0 items-center gap-3 text-xl font-bold">
+      <img src="/ruyi-logo-256.png" alt="" class="h-8 w-8" />
+      RuyiSDK Board Docs
+    </a>
+    <details class="group lg:flex-1" id="site-navigation">
+      <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-md hover:bg-accent lg:hidden [&::-webkit-details-marker]:hidden">
+        <Menu className="h-6 w-6" aria-hidden="true" />
+        <span class="sr-only">{lang === "zh" ? "导航菜单" : "Navigation menu"}</span>
+      </summary>
+      <div class="navigation-panel absolute inset-x-0 top-full z-30 border-b bg-background p-4 shadow-sm lg:static lg:items-center lg:justify-end lg:border-0 lg:p-0 lg:shadow-none">
+        <div class="flex flex-wrap items-center gap-3">
+          {externalLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-base transition-colors hover:text-primary lg:px-2">
+              {link.label}<ExternalLink className="h-4 w-4" aria-hidden="true" />
+            </a>
+          ))}
+          <div class="hidden h-5 w-px bg-border lg:block" aria-hidden="true"></div>
+          <a href="https://github.com/ruyisdk/board-docs" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-accent">
+            <Github className="h-5 w-5" aria-hidden="true" />
+          </a>
+          <a href={alternate.href} aria-label={lang === "zh" ? "Switch to English" : "切换到中文"} class="inline-flex h-10 items-center justify-center gap-2 rounded-md px-2 hover:bg-accent">
+            <Languages className="h-5 w-5" aria-hidden="true" />{alternate.label}
+          </a>
+        </div>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  @media (min-width: 64rem) {
+    details::details-content {
+      content-visibility: visible;
+    }
+    details > .navigation-panel {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  const navigation = document.querySelector<HTMLDetailsElement>("#site-navigation");
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && navigation?.open) {
+      navigation.open = false;
+      navigation.querySelector("summary")?.focus();
+    }
+  });
+</script>

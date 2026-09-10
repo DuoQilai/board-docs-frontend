@@ -19,6 +19,6 @@ const sv = boards[0]!.socVendor ?? "Unknown";
 const svSlug = slugifyUrlSegment(sv);
 ---
 
-<Layout title={`${sv} — 芯片厂商 — RuyiSDK Examples`}>
+<Layout title={`${sv} — 芯片厂商 — RuyiSDK Board Docs`}>
   {Astro.redirect(`/vendors/${encodeURIComponent(svSlug)}/`)}
 </Layout>

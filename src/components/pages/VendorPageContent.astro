@@ -4,7 +4,8 @@ import {
   groupBoardsBySiliconVendorChip,
   socSlugFromCpu,
 } from "../../lib/data";
-import { localePath, t, type Lang } from "../../lib/i18n";
+import { BoardCard } from "../BoardCard";
+import { t, type Lang } from "../../lib/i18n";
 
 interface Props {
   lang: Lang;
@@ -19,30 +20,46 @@ const group = tree[0]!;
 ---
 
 <div class="py-8">
-  <header class="mb-10">
+  <header class="mb-8">
     <h1 class="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">{label}</h1>
-    <p class="text-muted-foreground mt-2 text-sm">{t(lang, "vendorBoardsIntro")} </p>
+    <dl class="text-muted-foreground mt-4 grid max-w-xl grid-cols-3 gap-x-6 gap-y-2 text-sm">
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">SoC</dt>
+        <dd class="text-foreground text-2xl font-semibold tabular-nums">{group.chips.length}</dd>
+      </div>
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">{lang === "zh" ? "开发板" : "Boards"}</dt>
+        <dd class="text-foreground text-2xl font-semibold tabular-nums">{boards.length}</dd>
+      </div>
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-muted-foreground/80 text-xs font-medium uppercase tracking-wide">{lang === "zh" ? "示例" : "Examples"}</dt>
+        <dd class="text-foreground text-2xl font-semibold tabular-nums">{boards.reduce((total, board) => total + board.examples.length, 0)}</dd>
+      </div>
+    </dl>
   </header>
 
-  <div class="space-y-10">
+  <p class="text-muted-foreground mb-6 text-sm leading-6">{t(lang, "vendorBoardsIntro")}</p>
+  <hr class="border-border mb-4" />
+
+  <div class="grid gap-y-8">
     {
       group.chips.map((cg) => (
-        <section>
-          <h2 id={`soc-${socSlugFromCpu(cg.cpu)}`} class="text-foreground mb-3 text-lg font-semibold">
+        <section aria-labelledby={`soc-${socSlugFromCpu(cg.cpu)}`}>
+          <h2 id={`soc-${socSlugFromCpu(cg.cpu)}`} class="text-foreground mb-4 scroll-mt-6 text-lg font-semibold">
             {cg.cpu}
           </h2>
-          <ul class="divide-border divide-y rounded-xl border">
+          <ul class="flex list-none flex-wrap gap-5">
             {cg.boards.map((b) => (
-              <li>
-                <a
-                  href={localePath(lang, `/boards/${encodeURIComponent(b.slug)}/`)}
-                  class="hover:bg-muted/40 flex flex-wrap items-center justify-between gap-2 px-4 py-3 transition-colors"
-                >
-                  <span class="text-foreground font-medium">{b.product}</span>
-                  <span class="text-muted-foreground text-sm">
-                    {b.vendor ? `${t(lang, "boardVendorPrefix")}${b.vendor}` : ""}
-                  </span>
-                </a>
+              <li class="w-72 max-w-full">
+                <BoardCard
+                  lang={lang}
+                  product={b.product}
+                  slug={b.slug}
+                  cpu={b.cpu}
+                  vendor={b.vendor}
+                  socVendor={b.socVendor}
+                  exampleCount={b.examples.length}
+                />
               </li>
             ))}
           </ul>

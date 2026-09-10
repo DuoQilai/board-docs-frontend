@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Header from "../components/Header.astro";
 import { SiteSidebar } from "../components/SiteSidebar";
 import { getAllBoards } from "../lib/data";
 import { altLocale, HTML_LANG, t, type Lang } from "../lib/i18n";
@@ -10,7 +11,7 @@ interface Props {
   lang?: Lang;
 }
 
-const { title = "RuyiSDK Examples", lang = "zh" } = Astro.props;
+const { title = "RuyiSDK Board Docs", lang = "zh" } = Astro.props;
 const description = Astro.props.description ?? t(lang, "siteDescription");
 const boards = getAllBoards();
 const currentPath = Astro.url.pathname;
@@ -37,9 +38,11 @@ const enHref = new URL(enPath, Astro.site).href;
     <title>{title}</title>
   </head>
   <body>
-    <div class="mx-auto flex max-w-7xl">
-      <SiteSidebar client:load boards={boards} lang={lang} currentPath={currentPath} />
-      <main class="min-w-0 flex-1 px-4 sm:px-6">
+    <Header lang={lang} currentPath={currentPath} />
+    <slot name="announcement" />
+    <div class="mx-auto flex max-w-7xl items-start gap-6 px-4 py-6">
+      <SiteSidebar client:load boards={boards} lang={lang} />
+      <main class="min-w-0 flex-1 rounded-lg border border-border bg-background px-4 pb-6 sm:px-6">
         <slot />
       </main>
     </div>
