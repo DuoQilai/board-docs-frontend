@@ -39,6 +39,7 @@ export async function syncCourses(root = process.cwd()) {
   try {
     const repositories = new Map();
     const result = {};
+    const currentAssets = new Set();
     await mkdir(assets, { recursive: true });
     for (const source of urls) {
       const url = new URL(source);
@@ -78,6 +79,7 @@ export async function syncCourses(root = process.cwd()) {
           if (/\.(png|jpe?g|gif|svg|mp4|webm)$/i.test(target)) {
             const filename = `${hash(repository + checkout.revision + target)}${posix.extname(target)}`;
             await writeFile(join(assets, filename), await git(["-C", checkout.directory, "show", `${checkout.revision}:${target}`]));
+            currentAssets.add(filename);
             destination = `/course-assets/${filename}`;
           } else {
             await git(["-C", checkout.directory, "cat-file", "-e", `${checkout.revision}:${target}`]);
@@ -91,6 +93,11 @@ export async function syncCourses(root = process.cwd()) {
     const generated = join(temporary, "documents.json");
     await writeFile(generated, JSON.stringify(result));
     await rename(generated, join(cache, "documents.json"));
+    for (const entry of await readdir(assets, { withFileTypes: true })) {
+      if (entry.isFile() && !currentAssets.has(entry.name)) {
+        await rm(join(assets, entry.name));
+      }
+    }
     console.log(`[courses] fetched ${urls.size} documents from ${repositories.size} source revision(s)`);
   } finally {
     await rm(temporary, { recursive: true, force: true });
