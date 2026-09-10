@@ -31,7 +31,7 @@ const { board, lang, activeHref } = Astro.props;
 <style>
   @media (max-width: 639px) {
     .course-table, .course-table tbody { display: block; }
-    .course-table thead { display: none; }
+    .course-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     .course-table tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 1rem; gap: 0.75rem; }
     .course-table tr:first-child { border-top: 0; }
     .course-table th, .course-table td { min-width: 0; padding: 0; white-space: normal; overflow-wrap: anywhere; }
