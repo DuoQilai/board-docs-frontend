@@ -22,7 +22,7 @@ export default function BoardsHome({ boards, lang = "zh" }: BoardsHomeProps) {
   return (
     <div>
       <section className="py-10 text-center sm:py-14">
-        <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">RuyiSDK Examples</h1>
+        <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">{lang === "zh" ? "RuyiSDK · RISC-V 开发板教程与示例文档" : "RuyiSDK · RISC-V Board Tutorials and Examples"}</h1>
         <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-base">
           {t(lang, "heroTagline")}
         </p>
@@ -43,7 +43,7 @@ export default function BoardsHome({ boards, lang = "zh" }: BoardsHomeProps) {
           {t(lang, "noMatchingBoards")}
         </div>
       ) : (
-        <ul className="grid list-none gap-5 pb-16 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid auto-rows-fr list-none gap-5 pb-16 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((b) => (
             <li key={b.slug}>
               <BoardCard

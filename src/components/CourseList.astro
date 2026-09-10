@@ -1,0 +1,29 @@
+---
+import { courses, courseTitle, courseUrl, editions, editionLabel } from "../lib/courses";
+import type { Lang } from "../lib/i18n";
+interface Props { board: string; lang: Lang; activeHref?: string }
+const { board, lang, activeHref } = Astro.props;
+---
+{courses.filter((course) => course.board === board).map((course) => (
+  <div class="mb-6">
+    <h2 class="mb-3 text-lg font-semibold"><a class="hover:underline" href={courseUrl(course, lang)}>{courseTitle(course.title, lang)}</a></h2>
+    <p class="mb-4 text-sm text-muted-foreground"><a class="underline" href={course.source.repository}>{lang === "zh" ? "源码仓库" : "Source repository"}</a></p>
+    {course.chapters.map((chapter) => <section class="mb-4">
+      <h3 class="mb-2 font-medium">{chapter.id} · {courseTitle(chapter.title, lang)}</h3>
+      <div class="overflow-x-auto rounded-xl border">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-muted/50 text-muted-foreground"><tr>
+            {(lang === "zh" ? ["教材", "编程语言", "运行环境", "课程文档", "实验文档"] : ["Textbook", "Programming language", "Environment", "Lesson", "Lab"]).map((label) => <th class="whitespace-nowrap px-4 py-3" scope="col">{label}</th>)}
+          </tr></thead>
+          <tbody>{editions.map((edition) => <tr class:list={["border-t", { "bg-primary/10": activeHref?.startsWith(`${courseUrl(course, lang)}${edition}/${chapter.id}/`) }]}>
+            <th class="whitespace-nowrap px-4 py-3" scope="row">{editionLabel(edition)}</th>
+            <td class="whitespace-nowrap px-4 py-3">{course.editions[edition].programming_language}</td>
+            <td class="min-w-64 px-4 py-3">{courseTitle(course.editions[edition].environment, lang)}</td>
+            <td class="whitespace-nowrap px-4 py-3"><a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lesson/`}>{lang === "zh" ? "阅读课程" : "Read lesson"}</a></td>
+            <td class="whitespace-nowrap px-4 py-3"><a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lab/`}>{lang === "zh" ? "开始实验" : "Start lab"}</a></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+    </section>)}
+  </div>
+))}
