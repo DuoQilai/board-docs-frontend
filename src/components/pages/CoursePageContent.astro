@@ -15,6 +15,12 @@ const html = await renderCoursePage(page);
     </nav>
     {page.path && <CourseList board={course.board} lang={lang} activeHref={page.href} />}
     {page.fallback && <p class="mb-6 rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">{t(lang, "docFallbackNotice")}</p>}
-    <article class="prose prose-slate dark:prose-invert max-w-none prose-img:rounded-lg prose-pre:rounded-lg" set:html={html} />
+    <article class="course-document prose prose-slate dark:prose-invert max-w-none prose-img:rounded-lg prose-pre:rounded-lg" set:html={html} />
   </div>
 </Layout>
+
+<style>
+  .course-document { overflow-wrap: anywhere; }
+  .course-document :global(table) { display: block; max-width: 100%; overflow-x: auto; }
+  .course-document :global(pre) { max-width: 100%; overflow-x: auto; }
+</style>

@@ -11,14 +11,14 @@ const { board, lang, activeHref } = Astro.props;
     {course.chapters.map((chapter) => <section class="mb-4">
       <h3 class="mb-2 font-medium">{chapter.id} · {courseTitle(chapter.title, lang)}</h3>
       <div class="overflow-x-auto rounded-xl border">
-        <table class="w-full text-left text-sm">
+        <table class="course-table w-full text-left text-sm">
           <thead class="bg-muted/50 text-muted-foreground"><tr>
             {(lang === "zh" ? ["教材", "编程语言", "运行环境", "课程文档", "实验文档"] : ["Textbook", "Programming language", "Environment", "Lesson", "Lab"]).map((label) => <th class="whitespace-nowrap px-4 py-3" scope="col">{label}</th>)}
           </tr></thead>
           <tbody>{editions.map((edition) => <tr class:list={["border-t", { "bg-primary/10": activeHref?.startsWith(`${courseUrl(course, lang)}${edition}/${chapter.id}/`) }]}>
             <th class="whitespace-nowrap px-4 py-3" scope="row">{editionLabel(edition)}</th>
-            <td class="whitespace-nowrap px-4 py-3">{course.editions[edition].programming_language}</td>
-            <td class="min-w-64 px-4 py-3">{courseTitle(course.editions[edition].environment, lang)}</td>
+            <td data-label={lang === "zh" ? "编程语言" : "Programming language"} class="whitespace-nowrap px-4 py-3">{course.editions[edition].programming_language}</td>
+            <td data-label={lang === "zh" ? "运行环境" : "Environment"} class="min-w-64 px-4 py-3">{courseTitle(course.editions[edition].environment, lang)}</td>
             <td class="whitespace-nowrap px-4 py-3"><a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lesson/`}>{lang === "zh" ? "阅读课程" : "Read lesson"}</a></td>
             <td class="whitespace-nowrap px-4 py-3"><a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lab/`}>{lang === "zh" ? "开始实验" : "Start lab"}</a></td>
           </tr>)}</tbody>
@@ -27,3 +27,15 @@ const { board, lang, activeHref } = Astro.props;
     </section>)}
   </div>
 ))}
+
+<style>
+  @media (max-width: 639px) {
+    .course-table, .course-table tbody { display: block; }
+    .course-table thead { display: none; }
+    .course-table tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 1rem; gap: 0.75rem; }
+    .course-table tr:first-child { border-top: 0; }
+    .course-table th, .course-table td { min-width: 0; padding: 0; white-space: normal; overflow-wrap: anywhere; }
+    .course-table th, .course-table td[data-label] { grid-column: 1 / -1; }
+    .course-table td[data-label]::before { content: attr(data-label); display: block; color: var(--muted-foreground); font-size: 0.75rem; margin-bottom: 0.25rem; }
+  }
+</style>
