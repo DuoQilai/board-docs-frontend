@@ -43,10 +43,10 @@ export async function syncCourses(root = process.cwd()) {
     for (const source of urls) {
       const url = new URL(source);
       const [, owner, name, marker, ref, ...parts] = url.pathname.split("/");
-      if (url.protocol !== "https:" || url.hostname !== "gitee.com" || url.username || url.password || marker !== "blob" || !ref || !parts.length) {
-        throw new Error("Course source must be an HTTPS Gitee blob URL");
+      if (url.protocol !== "https:" || !["gitee.com", "github.com"].includes(url.hostname) || url.username || url.password || marker !== "blob" || !ref || !parts.length) {
+        throw new Error("Course source must be an HTTPS Gitee or GitHub blob URL");
       }
-      const repository = `https://gitee.com/${owner}/${name}`;
+      const repository = `https://${url.hostname}/${owner}/${name}`;
       const key = `${repository}/${ref}`;
       let checkout = repositories.get(key);
       if (!checkout) {
