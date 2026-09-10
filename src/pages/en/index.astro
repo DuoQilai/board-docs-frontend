@@ -1,5 +1,6 @@
 ---
 import BoardsHome from "../../components/BoardsHome";
+import CoursePreview from "../../components/CoursePreview.astro";
 import Layout from "../../layouts/Layout.astro";
 import { getAllBoards } from "../../lib/data";
 
@@ -10,6 +11,7 @@ if (import.meta.env.DEV) {
 }
 ---
 
-<Layout lang="en" title="RuyiSDK Examples">
+<Layout lang="en" title="RuyiSDK Board Docs">
+  <CoursePreview slot="announcement" lang="en" />
   <BoardsHome client:load boards={boards} lang="en" />
 </Layout>

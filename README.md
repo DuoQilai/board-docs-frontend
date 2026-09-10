@@ -2,7 +2,7 @@
 
 将测试文档仓库中的 RISC-V 开发板示例渲染为网页，按板子浏览和检索。
 
-https://board-docs-frontend.pages.dev/
+https://boards.ruyisdk.org/
 
 ## 自动同步
 
@@ -11,3 +11,10 @@ https://board-docs-frontend.pages.dev/
 ## 技术栈
 
 Astro 6 + React + TypeScript + Tailwind CSS v4。托管于 Cloudflare Pages。
+
+
+## Course sources
+
+Course metadata under `board-docs/<board>/courses/<course>/metadata.yml` stores Gitee document URLs for each edition and language, plus the remote README URL in `introduction_source`. The `editions` fields describe programming languages and runtime environments for the two-row textbook table. Astro fetches the selected branch on every development-server startup and production build, renders documents on local course routes, and copies referenced media into generated assets. Source failures stop startup/build; stale documents are not used as a fallback.
+
+Run `pnpm dev:only --host 127.0.0.1 --port 4321` for local preview, or `pnpm build` to refresh and build. Restart the development server after changing a source document or URL. `.cache/courses/` and `public/course-assets/` are generated and ignored by Git; do not edit or commit them. Fetching requires Git and network access to Gitee. The generated document cache records the fetched commit.

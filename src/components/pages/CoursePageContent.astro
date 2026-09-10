@@ -1,0 +1,20 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import CourseList from "../CourseList.astro";
+import { renderCoursePage, type CoursePage } from "../../lib/courses";
+import { localePath, t } from "../../lib/i18n";
+interface Props { page: CoursePage }
+const { page } = Astro.props;
+const { course, lang } = page;
+const html = await renderCoursePage(page);
+---
+<Layout lang={lang} title={`${page.title} — ${course.board}`}>
+  <div class="py-6">
+    <nav class="mb-5 flex flex-wrap gap-4 text-sm" aria-label={lang === "zh" ? "课程导航" : "Course navigation"}>
+      <a class="text-primary hover:underline" href={localePath(lang, `/boards/${course.board}/#panel-courses`)}>{lang === "zh" ? "返回课程" : "Back to courses"}</a>
+    </nav>
+    {page.path && <CourseList board={course.board} lang={lang} activeHref={page.href} />}
+    {page.fallback && <p class="mb-6 rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">{t(lang, "docFallbackNotice")}</p>}
+    <article class="prose prose-slate dark:prose-invert max-w-none prose-img:rounded-lg prose-pre:rounded-lg" set:html={html} />
+  </div>
+</Layout>

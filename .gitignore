@@ -24,3 +24,7 @@ pnpm-debug.log*
 
 # temporary scaffolding
 .scaffold/
+
+# Generated course sources and media
+.cache/courses/
+public/course-assets/

@@ -1,0 +1,72 @@
+---
+import { courses, courseTitle } from "../lib/courses";
+import { getAllBoards } from "../lib/data";
+import { localePath, type Lang } from "../lib/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const latestExamples = getAllBoards()
+  .flatMap((board) => board.examples.map((example) => ({
+    board,
+    example,
+    timestamp: Date.parse(example.lastUpdate ?? ""),
+  })))
+  .filter(({ timestamp }) => Number.isFinite(timestamp))
+  .sort((a, b) => b.timestamp - a.timestamp)
+  .slice(0, 2);
+---
+
+<section aria-label={lang === "zh" ? "预告与更新" : "Announcements and updates"} class="mx-auto max-w-7xl px-4 pt-6">
+  <div class="grid gap-5 rounded-lg border border-border px-5 py-4 md:grid-cols-[1fr_2fr]">
+    <div class="flex flex-wrap content-center items-center gap-3">
+      <span class="text-muted-foreground text-sm">{lang === "zh" ? "课程" : "Courses"}</span>
+      {courses.map((course) => (
+        <div class="flex flex-wrap items-center gap-2">
+          <a data-course-key={`${course.board}/${course.slug}`} class="text-foreground text-lg font-semibold hover:underline" href={localePath(lang, `/boards/${course.board}/#panel-courses`)}>
+            {courseTitle(course.title, lang)}
+            <span data-course-new hidden class="ml-1 rounded bg-secondary px-1.5 py-0.5 align-middle text-xs font-medium text-secondary-foreground">{lang === "zh" ? "新" : "New"}</span>
+          </a>
+          <span class="text-muted-foreground text-sm">{lang === "zh" ? "更新至：第1章：ROS 2 概述与架构设计" : "Updated through: Chapter 1: ROS 2 Overview and Architecture Design"}</span>
+        </div>
+      ))}
+    </div>
+    {latestExamples.length > 0 && (
+      <div class="min-w-0 border-t border-border pt-4 md:border-l md:border-t-0 md:pl-5 md:pt-0">
+        <h2 class="text-muted-foreground mb-3 text-sm font-medium">{lang === "zh" ? "最近更新" : "Latest example updates"}</h2>
+        <ul class="grid gap-1">
+          {latestExamples.map(({ board, example }) => (
+            <li>
+              <a
+                href={localePath(lang, `/boards/${encodeURIComponent(board.slug)}/${encodeURIComponent(example.slug)}/`)}
+                class="hover:bg-muted/50 focus-visible:ring-ring flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md p-2 text-sm transition-colors focus-visible:ring-2"
+              >
+                <span class="text-foreground font-medium">{board.product} · {example.title}</span>
+                <time datetime={example.lastUpdate} class="text-muted-foreground shrink-0 text-xs tabular-nums">{example.lastUpdate}</time>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>("[data-course-key]").forEach((link) => {
+    const badge = link.querySelector<HTMLElement>("[data-course-new]")!;
+    const key = `course-viewed:${link.dataset.courseKey}`;
+    function refreshBadge() {
+      try { badge.hidden = localStorage.getItem(key) === "1"; }
+      catch { badge.hidden = false; }
+    }
+    refreshBadge();
+    window.addEventListener("pageshow", refreshBadge);
+    link.addEventListener("click", () => {
+      badge.hidden = true;
+      try { localStorage.setItem(key, "1"); } catch { /* Storage may be disabled. */ }
+    });
+  });
+</script>
