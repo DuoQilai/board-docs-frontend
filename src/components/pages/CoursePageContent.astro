@@ -1,17 +1,22 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import CourseList from "../CourseList.astro";
-import { renderCoursePage, type CoursePage } from "../../lib/courses";
+import { courseUrl, renderCoursePage, type CoursePage } from "../../lib/courses";
 import { localePath, t } from "../../lib/i18n";
 interface Props { page: CoursePage }
 const { page } = Astro.props;
 const { course, lang } = page;
+const chapterIndex = course.chapters.findIndex((chapter) => page.path === `${page.edition}/${chapter.id}/lesson/`);
+const previousChapter = chapterIndex > 0 ? course.chapters[chapterIndex - 1] : undefined;
+const nextChapter = chapterIndex >= 0 ? course.chapters[chapterIndex + 1] : undefined;
 const html = await renderCoursePage(page);
 ---
 <Layout lang={lang} title={`${page.title} — ${course.board}`}>
   <div class="py-6">
     <nav class="mb-5 flex flex-wrap gap-4 text-sm" aria-label={lang === "zh" ? "课程导航" : "Course navigation"}>
-      <a class="text-primary hover:underline" href={localePath(lang, `/boards/${course.board}/#panel-courses`)}>{lang === "zh" ? "返回课程" : "Back to courses"}</a>
+      <a class="text-primary hover:underline" href={localePath(lang, `/boards/${course.board}/#panel-courses`)}>{lang === "zh" ? "返回课程目录" : "Back to course catalog"}</a>
+      {previousChapter && <a class="text-primary hover:underline" href={`${courseUrl(course, lang)}${page.edition}/${previousChapter.id}/lesson/`} rel="prev">{lang === "zh" ? "上一课" : "Previous lesson"}</a>}
+      {nextChapter && <a class="text-primary hover:underline" href={`${courseUrl(course, lang)}${page.edition}/${nextChapter.id}/lesson/`} rel="next">{lang === "zh" ? "下一课" : "Next lesson"}</a>}
     </nav>
     {page.path && <CourseList board={course.board} lang={lang} activeHref={page.href} />}
     {page.fallback && <p class="mb-6 rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">{t(lang, "docFallbackNotice")}</p>}
