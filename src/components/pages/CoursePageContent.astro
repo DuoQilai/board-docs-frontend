@@ -6,7 +6,7 @@ import { localePath, t } from "../../lib/i18n";
 interface Props { page: CoursePage }
 const { page } = Astro.props;
 const { course, lang } = page;
-const chapterIndex = course.chapters.findIndex((chapter) => page.path === `${page.edition}/${chapter.id}/lesson/`);
+const chapterIndex = course.chapters.findIndex((chapter) => page.path.startsWith(`${page.edition}/${chapter.id}/`));
 const previousChapter = chapterIndex > 0 ? course.chapters[chapterIndex - 1] : undefined;
 const nextChapter = chapterIndex >= 0 ? course.chapters[chapterIndex + 1] : undefined;
 const html = await renderCoursePage(page);
