@@ -1,5 +1,5 @@
 ---
-import { courses, courseTitle } from "../lib/courses";
+import { courses, courseTitle, courseUrl } from "../lib/courses";
 import { getAllBoards } from "../lib/data";
 import { localePath, type Lang } from "../lib/i18n";
 
@@ -8,6 +8,10 @@ interface Props {
 }
 
 const { lang } = Astro.props;
+const latestLessons = courses
+  .flatMap((course) => course.chapters.map((chapter, index) => ({ course, chapter, chapterNumber: index + 1 })))
+  .sort((a, b) => b.chapterNumber - a.chapterNumber)
+  .slice(0, 1);
 const latestExamples = getAllBoards()
   .flatMap((board) => board.examples.map((example) => ({
     board,
@@ -23,13 +27,13 @@ const latestExamples = getAllBoards()
   <div class="grid gap-5 rounded-lg border border-border px-5 py-4 md:grid-cols-[1fr_2fr]">
     <div class="flex flex-wrap content-center items-center gap-3">
       <span class="text-muted-foreground text-sm">{lang === "zh" ? "课程" : "Courses"}</span>
-      {courses.map((course) => (
+      {latestLessons.map(({ course, chapter, chapterNumber }) => (
         <div class="flex flex-wrap items-center gap-2">
-          <a data-course-key={`${course.board}/${course.slug}`} class="text-foreground text-lg font-semibold hover:underline" href={localePath(lang, `/boards/${course.board}/#panel-courses`)}>
+          <a data-course-key={`${course.board}/${course.slug}/${chapter.id}`} class="text-foreground text-lg font-semibold hover:underline" href={`${courseUrl(course, lang)}riscv/${chapter.id}/lesson/`}>
             {courseTitle(course.title, lang)}
             <span data-course-new hidden class="ml-1 rounded bg-secondary px-1.5 py-0.5 align-middle text-xs font-medium text-secondary-foreground">{lang === "zh" ? "新" : "New"}</span>
           </a>
-          <span class="text-muted-foreground text-sm">{lang === "zh" ? "更新至：第1章：ROS 2 概述与架构设计" : "Updated through: Chapter 1: ROS 2 Overview and Architecture Design"}</span>
+          <span class="text-muted-foreground text-sm">{lang === "zh" ? `更新至：第${chapterNumber}章：${courseTitle(chapter.title, lang)}` : `Updated through: Chapter ${chapterNumber}: ${courseTitle(chapter.title, lang)}`}</span>
         </div>
       ))}
     </div>

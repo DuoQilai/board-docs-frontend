@@ -4,11 +4,11 @@ import type { Lang } from "../lib/i18n";
 interface Props { board: string; lang: Lang; activeHref?: string }
 const { board, lang, activeHref } = Astro.props;
 ---
-{courses.filter((course) => course.board === board).map((course) => (
+{courses.filter((course) => course.board === board && (!activeHref || activeHref.startsWith(courseUrl(course, lang)))).map((course) => (
   <div class="mb-6">
     <h2 class="mb-3 text-lg font-semibold"><a class="hover:underline" href={courseUrl(course, lang)}>{courseTitle(course.title, lang)}</a></h2>
     <p class="mb-4 text-sm text-muted-foreground"><a class="underline" href={course.source.repository}>{lang === "zh" ? "源码仓库" : "Source repository"}</a></p>
-    {course.chapters.map((chapter) => <section class="mb-4">
+    {course.chapters.filter((chapter) => !activeHref || editions.some((edition) => activeHref.startsWith(`${courseUrl(course, lang)}${edition}/${chapter.id}/`))).map((chapter) => <section class="mb-4">
       <h3 class="mb-2 font-medium">{chapter.id} · {courseTitle(chapter.title, lang)}</h3>
       <div class="overflow-x-auto rounded-xl border">
         <table class="course-table w-full text-left text-sm">
