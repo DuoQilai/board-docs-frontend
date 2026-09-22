@@ -34,7 +34,7 @@ jobs:
       - name: Check category consistency
         run: pnpm run check:categories
 
-      - name: Test course asset cleanup
+      - name: Test course source synchronization
         run: node --test scripts/sync-courses.test.mjs
 
       - name: Build

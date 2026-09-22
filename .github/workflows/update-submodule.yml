@@ -1,4 +1,4 @@
-name: Sync board-docs Submodule
+name: Sync Content Submodules
 
 on:
   schedule:
@@ -17,27 +17,18 @@ jobs:
         with:
           ref: main
 
-      - name: Init and update board-docs submodule
+      - name: Init and update content submodules
         id: changes
         run: |
           set -e
-          git submodule update --init board-docs
-          cd board-docs
-          git fetch origin main
-          BEFORE=$(git rev-parse HEAD)
-          git checkout origin/main
-          AFTER=$(git rev-parse HEAD)
-          cd ..
-          if [ "$BEFORE" = "$AFTER" ]; then
+          git submodule update --init board-docs ros2-course
+          git submodule update --remote board-docs ros2-course
+          if git diff --quiet -- board-docs ros2-course; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "board-docs already at $AFTER"
+            echo "Content submodules are up to date"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "board-docs updated: $BEFORE → $AFTER"
-            echo "--- Changed files ---"
-            git -C board-docs diff --stat $BEFORE..$AFTER
-            echo "--- Affected boards ---"
-            git -C board-docs diff --name-only $BEFORE..$AFTER | sed 's|^board-docs/||' | cut -d'/' -f1 | sort -u
+            git diff --submodule=short -- board-docs ros2-course
           fi
 
       - uses: pnpm/action-setup@v4
@@ -53,6 +44,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: |
           pnpm install --frozen-lockfile
+          node --test scripts/sync-courses.test.mjs
           pnpm build
 
       - name: Commit and push
@@ -60,10 +52,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add board-docs
-          if git diff --staged --quiet board-docs; then
+          git add board-docs ros2-course
+          if git diff --staged --quiet -- board-docs ros2-course; then
             echo "No staged submodule changes, skipping push"
             exit 0
           fi
-          git commit -m "chore: bump board-docs submodule"
+          git commit -m "chore: bump content submodules"
           git push

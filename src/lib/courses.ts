@@ -1,6 +1,5 @@
 import { posix } from "node:path";
-import { parse } from "yaml";
-import fetchedDocuments from "../../.cache/courses/documents.json";
+import courseCache from "../../.cache/courses/documents.json";
 import { localePath, type Lang } from "./i18n";
 import { renderMarkdownToHtml } from "./renderMarkdown";
 
@@ -23,17 +22,16 @@ export type Course = {
   editions: Record<Edition, { programming_language: string; environment: Titles }>;
   chapters: Chapter[];
 };
-const manifests = import.meta.glob("../../board-docs/*/courses/*/metadata.yml", { eager: true, query: "?raw", import: "default" }) as Record<string, string>;
+const manifests = courseCache.courses as Record<string, Omit<Course, "board" | "slug" | "directory">>;
 const documents = import.meta.glob("../../board-docs/*/courses/**/*.md", { eager: true, query: "?raw", import: "default" }) as Record<string, string>;
 const media = import.meta.glob("../../board-docs/*/courses/**/*.{png,jpg,jpeg,gif,svg,mp4,webm}", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
-const remoteDocuments = fetchedDocuments as Record<string, { body: string; links: Record<string, string>; revision: string }>;
+const remoteDocuments = courseCache.documents as Record<string, { body: string; links: Record<string, string>; revision: string }>;
 export const courseTitle = (titles: Titles, lang: Lang) => titles[lang] ?? titles.zh ?? titles.en ?? "";
 export const courseUrl = (course: Course, lang: Lang) => localePath(lang, `/boards/${course.board}/courses/${course.slug}/`);
-export const courses: Course[] = Object.entries(manifests).map(([key, raw]) => {
-  const [, board, slug] = key.match(/board-docs\/([^/]+)\/courses\/([^/]+)\/metadata.yml$/)!;
-  const data = parse(raw);
+export const courses: Course[] = Object.entries(manifests).map(([key, data]) => {
+  const [board, slug] = key.split("/");
   if (!data?.title?.zh || !Array.isArray(data.chapters) || !data.chapters.length) throw new Error(`Invalid course manifest: ${key}`);
-  return { ...data, board, slug, directory: posix.dirname(key) };
+  return { ...data, board, slug, directory: `../../board-docs/${board}/courses/${slug}` };
 });
 export const coursePages = courses.flatMap((course) => (["zh", "en"] as Lang[]).flatMap((lang) => {
   const makePage = (path: string, title: string, requested: string, fallback: string, edition?: Edition) => {
