@@ -2,3 +2,7 @@
 	path = board-docs
 	url = https://github.com/ruyisdk/board-docs.git
 	branch = main
+[submodule "ros2-course"]
+	path = ros2-course
+	url = https://github.com/DuoQilai/ROS2_RISCV.git
+	branch = master
