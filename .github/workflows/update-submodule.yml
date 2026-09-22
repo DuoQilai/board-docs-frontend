@@ -21,8 +21,7 @@ jobs:
         id: changes
         run: |
           set -e
-          git submodule update --init board-docs ros2-course
-          git submodule update --remote board-docs ros2-course
+          bash scripts/update-content-submodules.sh board-docs ros2-course
           if git diff --quiet -- board-docs ros2-course; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "Content submodules are up to date"
@@ -44,7 +43,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: |
           pnpm install --frozen-lockfile
-          node --test scripts/sync-courses.test.mjs
+          node --test scripts/*.test.mjs
           pnpm build
 
       - name: Commit and push

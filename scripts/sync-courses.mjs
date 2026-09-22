@@ -26,8 +26,9 @@ export async function syncCourses(root = process.cwd()) {
   const cache = join(root, ".cache/courses");
   const assets = join(root, "public/course-assets");
   const urls = new Set();
+  const catalogUrls = new Set();
   const courses = {};
-  let checkout;
+  let submodule;
   const boards = join(root, "board-docs");
   for (const board of await readdir(boards, { withFileTypes: true })) {
     if (!board.isDirectory() || board.name.startsWith(".")) continue;
@@ -37,16 +38,21 @@ export async function syncCourses(root = process.cwd()) {
     catch (error) { if (error.code === "ENOENT") continue; throw error; }
     for (const course of entries.filter((entry) => entry.isDirectory())) {
       let metadata = parse(await readFile(join(folder, course.name, "metadata.yml"), "utf8"));
-      if (metadata.catalog) {
-        checkout ??= await courseSubmodule(root);
-        metadata = parse((await git(["-C", checkout.directory, "show", `${checkout.revision}:${metadata.catalog}`])).toString("utf8"));
+      const fromCatalog = Boolean(metadata.catalog);
+      if (fromCatalog) {
+        submodule ??= await courseSubmodule(root);
+        metadata = parse((await git(["-C", submodule.directory, "show", `${submodule.revision}:${metadata.catalog}`])).toString("utf8"));
       }
       courses[`${board.name}/${course.name}`] = metadata;
-      if (metadata.introduction_source) urls.add(metadata.introduction_source);
+      const addSource = (url) => {
+        urls.add(url);
+        if (fromCatalog) catalogUrls.add(url);
+      };
+      if (metadata.introduction_source) addSource(metadata.introduction_source);
       for (const chapter of metadata.chapters) {
         for (const edition of Object.values(chapter.documents)) {
           for (const language of Object.values(edition)) {
-            for (const url of Object.values(language)) urls.add(url);
+            for (const url of Object.values(language)) addSource(url);
           }
         }
       }
@@ -55,7 +61,7 @@ export async function syncCourses(root = process.cwd()) {
   await mkdir(cache, { recursive: true });
   const temporary = await mkdtemp(join(cache, "sources-"));
   try {
-    if (urls.size) checkout ??= await courseSubmodule(root);
+    const repositories = new Map();
     const result = {};
     const currentAssets = new Set();
     await mkdir(assets, { recursive: true });
@@ -66,8 +72,22 @@ export async function syncCourses(root = process.cwd()) {
         throw new Error("Course source must be an HTTPS Gitee or GitHub blob URL");
       }
       const repository = `https://${url.hostname}/${owner}/${name}`;
-      if (repository !== checkout.repository || ![checkout.branch, checkout.revision].includes(decodeURIComponent(ref))) {
-        throw new Error(`Course source does not match the ros2-course submodule: ${source}`);
+      let checkout;
+      if (catalogUrls.has(source)) {
+        if (repository !== submodule.repository || ![submodule.branch, submodule.revision].includes(decodeURIComponent(ref))) {
+          throw new Error(`Course source does not match the ros2-course submodule: ${source}`);
+        }
+        checkout = submodule;
+      } else {
+        const key = `${repository}/${ref}`;
+        checkout = repositories.get(key);
+        if (!checkout) {
+          const directory = join(temporary, hash(key));
+          await git(["clone", "--depth", "1", "--no-checkout", "--branch", decodeURIComponent(ref), `${repository}.git`, directory]);
+          const revision = (await git(["-C", directory, "rev-parse", "HEAD"])).toString().trim();
+          checkout = { directory, revision };
+          repositories.set(key, checkout);
+        }
       }
       const path = decodeURIComponent(parts.join("/"));
       const body = (await git(["-C", checkout.directory, "show", `${checkout.revision}:${path}`])).toString("utf8");
@@ -110,7 +130,7 @@ export async function syncCourses(root = process.cwd()) {
         await rm(join(assets, entry.name));
       }
     }
-    console.log(`[courses] loaded ${urls.size} documents from ros2-course${checkout ? ` at ${checkout.revision}` : ""}`);
+    console.log(`[courses] loaded ${urls.size} documents from ${repositories.size} external source revision(s)${submodule ? ` and ros2-course at ${submodule.revision}` : ""}`);
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

@@ -35,7 +35,7 @@ jobs:
         run: pnpm run check:categories
 
       - name: Test course source synchronization
-        run: node --test scripts/sync-courses.test.mjs
+        run: node --test scripts/*.test.mjs
 
       - name: Build
         run: pnpm build
