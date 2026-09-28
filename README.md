@@ -15,7 +15,7 @@ Astro 6 + React + TypeScript + Tailwind CSS v4。托管于 Cloudflare Pages。
 
 ## Course sources
 
-Course metadata under `board-docs/<board>/courses/<course>/metadata.yml` points to a catalog inside the `ros2-course` submodule, for example `catalog: catalogs/CoM260_Kit.yml`. The catalog stores the course title, ordered chapters, document URLs for each edition and language, `introduction_source`, and edition environments. Chapter and lab mappings stay explicit because several later theory chapters share one lab. The submodule provides the catalog, documents and media from the GitHub mirror at `https://github.com/DuoQilai/ROS2_RISCV`; the source repository link continues to point to Gitee.
+Course metadata under `board-docs/<board>/courses/<course>/metadata.yml` points to a catalog inside the `ros2-course` submodule, for example `catalog: course_support/k3_com260_kit/catalog.yml`. The catalog stores the course title, ordered chapters, document URLs for each edition and language, `introduction_source`, and edition environments. Chapter and lab mappings stay explicit because several later theory chapters share one lab. The submodule provides the catalog, documents and media from the GitHub mirror at `https://github.com/DuoQilai/ROS2_RISCV`; the source repository link continues to point to Gitee.
 
 Initialize the versions recorded by the frontend before starting development or building:
 
