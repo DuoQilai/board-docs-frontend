@@ -9,6 +9,11 @@ const { board, lang, activeHref } = Astro.props;
     <h2 class="mb-3 text-lg font-semibold"><a class="hover:underline" href={courseUrl(course, lang)}>{courseTitle(course.title, lang)}</a></h2>
     <p class="mb-4 text-sm text-muted-foreground"><a class="underline" href={course.source.repository}>{lang === "zh" ? "源码仓库" : "Source repository"}</a></p>
     {course.chapters.filter((chapter) => !activeHref || editions.some((edition) => activeHref.startsWith(`${courseUrl(course, lang)}${edition}/${chapter.id}/`))).map((chapter) => <section class="mb-4">
+      {!activeHref && board === "CoM260_Kit" && course.slug === "ros2" && chapter.id === "ch10" && <p class="mb-3 text-sm text-muted-foreground">
+        {lang === "zh"
+          ? "第 10～15 章共用《SLAM 建图与定位》实验指导书，各章“开始实验”均进入同一份实验手册。"
+          : "Chapters 10–15 share the SLAM Mapping and Localization lab manual; each chapter’s “Start lab” link opens the same manual."}
+      </p>}
       <h3 class="mb-2 font-medium">{chapter.id} · {courseTitle(chapter.title, lang)}</h3>
       <div class="overflow-x-auto rounded-xl border">
         <table class="course-table w-full text-left text-sm">
