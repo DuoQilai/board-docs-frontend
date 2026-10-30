@@ -32,7 +32,7 @@ export const courses: Course[] = Object.entries(manifests).map(([key, data]) => 
   const [board, slug] = key.split("/");
   if (!data?.title?.zh || !Array.isArray(data.chapters) || !data.chapters.length) throw new Error(`Invalid course manifest: ${key}`);
   const chapters = key === "CoM260_Kit/ros2"
-    ? data.chapters.filter((chapter) => Number(chapter.id.slice(2)) <= 12)
+    ? data.chapters.filter((chapter) => Number(chapter.id.slice(2)) <= 15)
     : data.chapters;
   return { ...data, chapters, board, slug, directory: `../../board-docs/${board}/courses/${slug}` };
 });
