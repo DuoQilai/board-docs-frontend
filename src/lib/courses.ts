@@ -10,7 +10,7 @@ export const editionLabel = (edition: Edition) => edition === "riscv" ? "RISC-V"
 type Chapter = {
   id: string;
   title: Titles;
-  documents: Record<Edition, Partial<Record<Lang, { lesson: string; lab: string }>>>;
+  documents: Record<Edition, Partial<Record<Lang, { lesson: string; lab?: string }>>>;
 };
 export type Course = {
   board: string;
@@ -44,10 +44,11 @@ export const coursePages = courses.flatMap((course) => (["zh", "en"] as Lang[]).
   };
   return [
     makePage("", courseTitle(course.title, lang), lang === "zh" ? course.introduction_source : "README.md", course.introduction_source),
-    ...course.chapters.flatMap((chapter) => editions.flatMap((edition) => (["lesson", "lab"] as const).map((kind) => {
+    ...course.chapters.flatMap((chapter) => editions.flatMap((edition) => (["lesson", "lab"] as const).flatMap((kind) => {
       const version = chapter.documents[edition];
       const zh = version.zh?.[kind];
       const requested = version[lang]?.[kind];
+      if (kind === "lab" && !zh && !requested) return [];
       if (!zh && !requested) throw new Error(`Missing ${kind} in ${course.slug}/${edition}/${chapter.id}`);
       const title = `${courseTitle(chapter.title, lang)} · ${editionLabel(edition)} · ${kind === "lesson" ? (lang === "zh" ? "课程" : "Lesson") : (lang === "zh" ? "实验" : "Lab")}`;
       return makePage(`${edition}/${chapter.id}/${kind}/`, title, requested ?? `missing-${lang}`, zh ?? requested!, edition);
@@ -58,16 +59,21 @@ export type CoursePage = typeof coursePages[number];
 
 export async function renderCoursePage(page: CoursePage) {
   const remote = remoteDocuments[page.sourcePath];
+  const chapterPath = posix.dirname(page.href);
+  function findLinkedPage(sourcePath: string) {
+    const matches = coursePages.filter((item) => item.lang === page.lang && item.sourcePath === sourcePath);
+    return matches.find((item) => posix.dirname(item.href) === chapterPath) ?? matches[0];
+  }
   return renderMarkdownToHtml(remote?.body ?? documents[page.sourcePath], (url) => {
     let target = remote?.links[url] ?? url;
     const fragmentIndex = target.indexOf("#");
     const fragment = fragmentIndex >= 0 ? target.slice(fragmentIndex) : "";
     const file = fragmentIndex >= 0 ? target.slice(0, fragmentIndex) : target;
-    const linkedPage = coursePages.find((item) => item.lang === page.lang && item.sourcePath === file);
+    const linkedPage = findLinkedPage(file);
     if (linkedPage) return linkedPage.href + fragment;
     if (/^(?:[a-z][a-z0-9+.-]*:|#|\/)/i.test(target)) return target;
     const key = posix.join(posix.dirname(page.sourcePath), decodeURIComponent(file));
-    const local = coursePages.find((item) => item.lang === page.lang && item.sourcePath === key)?.href ?? media[key];
+    const local = findLinkedPage(key)?.href ?? media[key];
     if (!local) throw new Error(`Unresolved course link: ${page.sourcePath}: ${url}`);
     return local + fragment;
   });
