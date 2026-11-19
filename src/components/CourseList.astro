@@ -25,7 +25,10 @@ const { board, lang, activeHref } = Astro.props;
             <td data-label={lang === "zh" ? "编程语言" : "Programming language"} class="whitespace-nowrap px-4 py-3">{course.editions[edition].programming_language}</td>
             <td data-label={lang === "zh" ? "运行环境" : "Environment"} class="min-w-64 px-4 py-3">{courseTitle(course.editions[edition].environment, lang)}</td>
             <td class="whitespace-nowrap px-4 py-3"><a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lesson/`}>{lang === "zh" ? "阅读课程" : "Read lesson"}</a></td>
-            <td class="whitespace-nowrap px-4 py-3"><a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lab/`}>{lang === "zh" ? "开始实验" : "Start lab"}</a></td>
+            <td class="whitespace-nowrap px-4 py-3">{chapter.documents[edition][lang]?.lab || chapter.documents[edition].zh?.lab
+              ? <a class="text-primary underline" href={`${courseUrl(course, lang)}${edition}/${chapter.id}/lab/`}>{lang === "zh" ? "开始实验" : "Start lab"}</a>
+              : <span class="text-muted-foreground">{lang === "zh" ? "无独立实验" : "No separate lab"}</span>}
+            </td>
           </tr>)}</tbody>
         </table>
       </div>

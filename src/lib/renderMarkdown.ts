@@ -1,3 +1,4 @@
+import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -20,6 +21,7 @@ export async function renderMarkdownToHtml(markdown: string, resolveUrl?: (url: 
       walk(tree);
     })
     .use(remarkRehype)
+    .use(rehypeHeadingIds)
     .use(rehypePrettyCode, {
       theme: "github-dark",
     })

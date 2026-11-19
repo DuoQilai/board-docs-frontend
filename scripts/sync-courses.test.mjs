@@ -197,14 +197,20 @@ test("publish catalog changes by updating only the course revision", async () =>
     assert.deepEqual(JSON.parse(await readFile(cache, "utf8")).courses["board/course"].chapters.map(({ id }) => id), ["ch01"]);
 
     data.chapters.push(chapter("ch02", "ch01"));
+    const lessonOnly = chapter("ch21");
+    for (const edition of Object.values(lessonOnly.documents)) delete edition.zh.lab;
+    data.chapters.push(lessonOnly);
+    await writeFile(join(repository, "ch21.md"), "# Visual SLAM introduction");
     await writeFile(catalog, JSON.stringify(data));
     await writeFile(join(repository, "ch02.md"), "# Second chapter\n[Previous](ch01.md#intro)");
     const secondRevision = commit();
     await syncCourses(root);
     const successfulCache = await readFile(cache, "utf8");
     const { courses, documents } = JSON.parse(successfulCache);
-    assert.deepEqual(courses["board/course"].chapters.map(({ id }) => id), ["ch01", "ch02"]);
+    assert.deepEqual(courses["board/course"].chapters.map(({ id }) => id), ["ch01", "ch02", "ch21"]);
     assert.equal(courses["board/course"].chapters[1].documents.x86.zh.lab, source("ch01_lab.md"));
+    assert.equal(courses["board/course"].chapters[2].documents.riscv.zh.lab, undefined);
+    assert.equal(documents[source("ch21.md")].body, "# Visual SLAM introduction");
     assert.equal(documents[source("ch02.md")].links["ch01.md#intro"], source("ch01.md") + "#intro");
     assert.ok(Object.values(documents).every(({ revision }) => revision === secondRevision));
     assert.equal(await readFile(manifest, "utf8"), reference);
