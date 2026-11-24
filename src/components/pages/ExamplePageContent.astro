@@ -87,4 +87,13 @@ const sourceDocUrl = `/${rawDocPath}`;
       });
     }
   }
+
+  document.addEventListener("contextmenu", (e) => {
+    window.parent.postMessage({
+      type: "contextmenu",
+      x: e.clientX,
+      y: e.clientY,
+      selection: window.getSelection()?.toString() ?? "",
+    }, "*");
+  });
 </script>
